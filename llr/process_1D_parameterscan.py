@@ -33,10 +33,6 @@ for dkey in all_data.keys():
                             importantsystvalue[dkey][hkey][key] = fh[dkey][hkey][key]
             
             for systkey in all_data[dkey][hkey].keys():
-
-                print importantsystvalue.keys()
-                print importantsystvalue[dkey].keys()
-                print importantsystvalue[dkey][hkey].keys()
                 
                 vals = {}
                 vals[systkey] = []
