@@ -20,11 +20,9 @@ all_data = fh['trials'][0]
 for dkey in all_data.keys():
     for hkey in all_data[dkey].keys():
         if hkey in ['hypo_NMH', 'hypo_IMH']:
-
-            importantsystvalue[dkey] = {}
-            importantsystvalue[dkey][hkey] = {}
-
             if args.min_checks:
+                importantsystvalue[dkey] = {}
+                importantsystvalue[dkey][hkey] = {}
                 for key in fh[dkey][hkey].keys():
                     if key not in ['trials', 'seed', 'template_settings']:
                         if key in ['theta12', 'theta13', 'deltacp', 'theta23']:
@@ -52,14 +50,15 @@ for dkey in all_data.keys():
                 xmax = x.max()
                 ymin = y.min()-0.05*(y.max()-y.min())
                 ymax = y.max()+0.05*(y.max()-y.min())
-                if y.min() > importantsystvalue[dkey][hkey]['llh']:
-                    ymin = importantsystvalue[dkey][hkey]['llh']-0.05*(y.max()-y.min())
-                if y.max() < importantsystvalue[dkey][hkey]['llh']:
-                    ymax = importantsystvalue[dkey][hkey]['llh']+0.05*(y.max()-y.min())
-                if x.min() > importantsystvalue[dkey][hkey][systkey]:
-                    xmin = importantsystvalue[dkey][hkey][systkey]-0.05*(x.max()-x.min())
-                if x.max() < importantsystvalue[dkey][hkey][systkey]:
-                    xmax = importantsystvalue[dkey][hkey][systkey]+0.05*(x.max()-x.min())
+                if args.min_checks:
+                    if y.min() > importantsystvalue[dkey][hkey]['llh']:
+                        ymin = importantsystvalue[dkey][hkey]['llh']-0.05*(y.max()-y.min())
+                    if y.max() < importantsystvalue[dkey][hkey]['llh']:
+                        ymax = importantsystvalue[dkey][hkey]['llh']+0.05*(y.max()-y.min())
+                    if x.min() > importantsystvalue[dkey][hkey][systkey]:
+                        xmin = importantsystvalue[dkey][hkey][systkey]-0.05*(x.max()-x.min())
+                    if x.max() < importantsystvalue[dkey][hkey][systkey]:
+                        xmax = importantsystvalue[dkey][hkey][systkey]+0.05*(x.max()-x.min())
                 plt.axis([xmin, xmax, ymin, ymax])
                 plt.xlabel(systkey)
                 plt.ylabel('llh')

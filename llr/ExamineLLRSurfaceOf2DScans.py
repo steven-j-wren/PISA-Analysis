@@ -62,7 +62,6 @@ output['seed'] = 0
 
 trials = []
 
-print all_data.keys()
 for dkey in all_data.keys():
     if dkey in ['data_NMH', 'hypo_NMH']:
 
@@ -117,6 +116,7 @@ for dkey in all_data.keys():
                     fmap = get_random_map(asimov_data,
                                           seed=output['seed'])
                 else:
+                    print "Using Asimov Data"
                     fmap = asimov_data
 
                 for itrial in xrange(1,2):
@@ -129,9 +129,6 @@ for dkey in all_data.keys():
                     results[dkey][hkey] = {}
 
                     for Tname in names:
-                        print dkey
-                        print hkey
-                        print output[dkey][hkey].keys()
                         for key in output[dkey][hkey].keys():
                             if key not in ['llh','llh_check','template_settings','seed']:
                                 if key in ['theta23','deltam31']:
