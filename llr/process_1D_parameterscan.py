@@ -8,7 +8,7 @@ import math
 parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
 parser.add_argument('llh_file',type=str,help="Processed LLH files to analyze")
 parser.add_argument('-m','--min_checks',action='store_true',default=False,
-                    help='Data file ran as a minimiser check')
+                    help="Data file ran as a minimiser check")
 args = parser.parse_args()
 
 fh = json.load(open(args.llh_file))

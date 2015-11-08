@@ -35,12 +35,17 @@ for itrial in xrange(1,len(fileone['trials'])+1):
         for hypo_tag in fileone['trials'][itrial-1][data_tag].keys():
 
             all_metric_data = []
-            
-            for llh_file in args.llh_files:
 
-                fh = json.load(open(llh_file))
-                metric_data = fh['trials'][0][data_tag][hypo_tag]
-                all_metric_data += metric_data
+            for j in range(0,21):
+
+                deltam31 = 0.0022 + j*0.00002
+                
+                for llh_file in args.llh_files:
+
+                    fh = json.load(open(llh_file))
+                    metric_data = fh['trials'][0][data_tag][hypo_tag]
+                    if metric_data[0]['deltam31'][0] == deltam31:
+                        all_metric_data += metric_data
 
             results[data_tag][hypo_tag] = all_metric_data
 
