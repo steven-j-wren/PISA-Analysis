@@ -33,14 +33,8 @@ for dkey in all_data.keys():
                     else:
                         vals[key].append(el[key][0])
 
-            print len(vals['theta23'])
-            print len(vals['deltam31'])
-
             x = np.array(vals['theta23'])
             y = np.array(vals['deltam31'])
-
-            print x
-            print y
 
             for key in vals.keys():
                 if key not in ['theta23','deltam31']:
