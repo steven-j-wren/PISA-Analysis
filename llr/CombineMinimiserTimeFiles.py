@@ -22,14 +22,18 @@ fileone = json.load(open(args.llh_files[0]))
 histtitle = fileone['histtitle']
 minimisername = fileone['minimisername']
 times = []
+iterations = []
 
 for llh_file_name in args.llh_files:
 
     llh_file = json.load(open(llh_file_name))
     times += llh_file['times']
+    iterations += llh_file['iterations']
 
 output = {}
 output['times'] = times
+if len(iterations) != 0:
+    output['iterations'] = iterations
 output['minimisername'] = minimisername
 output['histtitle'] = histtitle
 
