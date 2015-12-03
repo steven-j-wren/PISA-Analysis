@@ -106,6 +106,7 @@ for theta23 in theta23vals:
             splits1 = falseinfile.split('sin2theta23')
             splits2 = splits1[-1].split('Data')
             if "%.2f"%sin2theta23 == splits2[0]:
+                indict = from_json(false_h_best_fit_dir+falseinfile)
                 for data_tag in indict['results'].keys():
                     if 'NMH' in data_tag or 'NH' in data_tag:
                         hypo_tag = 'hypo_IMH'
@@ -157,6 +158,7 @@ for livetime in livetimevals:
             splits1 = falseinfile.split('livetime')
             splits2 = splits1[-1].split('Data')
             if "%.2f"%livetime == splits2[0]:
+                indict = from_json(false_h_best_fit_dir+falseinfile)
                 for data_tag in indict['results'].keys():
                     if 'NMH' in data_tag or 'NH' in data_tag:
                         hypo_tag = 'hypo_IMH'
