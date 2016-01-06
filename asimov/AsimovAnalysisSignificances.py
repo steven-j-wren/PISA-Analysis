@@ -20,6 +20,8 @@ parser.add_argument('-th23','--theta23', action='store_true', default=False,
                     help="Analysing as a function of theta23")
 parser.add_argument('-l','--livetime', action='store_true', default=False,
                     help="Analysis as a function of livetime")
+parser.add_argument('--finer', action='store_true', default=False,
+                    help="Flag to use if finer binned in sin2theta23")
 parser.add_argument('-v', '--verbose', action='count', default=None,
                     help='set verbosity level')
 args = parser.parse_args()
@@ -28,6 +30,7 @@ true_h_fid_dir = args.true_h_fid_dir
 false_h_best_fit_dir = args.false_h_best_fit_dir
 theta23analysis = args.theta23
 livetimeanalysis = args.livetime
+finer = args.finer
 
 theta23vals = []
 sin2theta23vals = []
@@ -94,7 +97,11 @@ for theta23 in theta23vals:
             sin2theta23 = math.pow(math.sin(theta23),2)
             splits1 = falseinfile.split('sin2theta23')
             splits2 = splits1[-1].split('Data')
-            if "%.2f"%sin2theta23 == splits2[0]:
+            if finer == True:
+                RightFile = "%.4f"%sin2theta23 == splits2[0]
+            else:
+                RightFile = "%.2f"%sin2theta23 == splits2[0]
+            if RightFile == True:
                 indict = from_json(false_h_best_fit_dir+falseinfile)
                 for data_tag in indict['results'].keys():
                     if 'NMH' in data_tag or 'NH' in data_tag:
@@ -170,9 +177,10 @@ if theta23analysis == True:
     xlabel = r"$\sin^2\theta_{23}$"
     xmin = 0.30
     xmax = 0.70
-    ymin = 0.30
-    ymax = 2.30
-    title = "DeepCore NMO Significances for 10 years Livetime"
+    ymin = 0.15
+    ymax = 1.30
+    title = "DeepCore NMO Significances for 3 years Livetime"
+    #title = "DeepCore NMO Significances for 10 years Livetime"
     filename = 'Sin2Theta23Significances.png'
 
 if livetimeanalysis == True:
@@ -180,22 +188,36 @@ if livetimeanalysis == True:
     xlabel = "Livetime [yrs]"
     xmin = 2.
     xmax = 11.
-    ymin = 0.10
+    ymin = 0.90
     ymax = 1.90
-    title = r"DeepCore NMO Significances for $\theta_{23}=49.5^{\circ}$"
+    title = r"DeepCore NMO Significances for Nu-Fit 2014 $\theta_{23}$ values"
+    #title = r"DeepCore NMO Significances for $\theta_{23}=42.3^{\circ}$"
+    #title = r"DeepCore NMO Significances for $\theta_{23}=49.5^{\circ}$"
     filename = 'LivetimeSignificances.png'
 
 yTNH = np.array(significances['data_NMH'])
 yTIH = np.array(significances['data_IMH'])
 
-plt.plot(x,yTNH,color='r')
-plt.plot(x,yTIH,color='b')
-plt.axis([xmin, xmax, ymin, ymax])
+plt.plot(x,yTNH,color='r',marker="o")
+plt.plot(x,yTIH,color='b',marker="o")
+#plt.axis([xmin, xmax, ymin, ymax])
 plt.legend(['Normal','Inverted'],loc='upper left')
 plt.xlabel(xlabel)
 plt.ylabel(r'Significance ($\sigma$)')
 plt.title(title)
 plt.savefig(filename)
+
+if theta23analysis == True:
+    
+    NuFitFirstOctant = 0.7382742735936013
+    NuFitSecondOctant = 0.8639379797371931
+    NFFOSin2Theta23 = math.pow(math.sin(NuFitFirstOctant ),2)
+    NFSOSin2Theta23 = math.pow(math.sin(NuFitSecondOctant ),2)
+
+    plt.axvline(NFFOSin2Theta23, linestyle='--', color='r', label='NO Best Fit)')
+    plt.axvline(NFSOSin2Theta23, linestyle='--', color='b', label='IO Best Fit')
+    plt.legend(['Normal','Inverted','NO Best Fit','IO Best Fit'],loc='upper left')
+    plt.savefig('Sin2Theta23SignificanceswBestFits.png')
 
 
                         
