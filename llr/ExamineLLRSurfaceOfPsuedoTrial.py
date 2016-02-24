@@ -109,7 +109,7 @@ for dkey in fh.keys():
             data_normal = False
 
         for afkey in data.keys():
-            fit_method = data[afkey][0]
+            fit_method = data[afkey]['trials'][0]
 
             output[dkey][afkey] = {}
             results[dkey][afkey] = {}
