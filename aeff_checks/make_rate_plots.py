@@ -19,7 +19,7 @@ args = parser.parse_args()
 fh = json.load(open(args.rates_file))
 
 detector = args.detector
-selection = args.selection + ' Event Selection'
+selection = args.selection
 
 all_rates_hists = {}
 nunctot = []
@@ -27,7 +27,7 @@ nubarnctot = []
 total_nc_rate = 0.0
 total_ncbar_rate = 0.0
 
-histtitle = detector + ' ' + selection + ' ' + 'PISA Event Rates'
+histtitle = detector + ' ' + selection + ' Event Selection ' + 'PISA Event Rates'
 
 for flavour in fh.keys():
 
@@ -100,7 +100,7 @@ for flavour in fh.keys():
             plt.yscale('log')
             plt.legend(loc='upper right')
             plt.title(histtitle)
-            filename = "%s_%s_Rates.png"%(flavour,int_type)
+            filename = "%s_%s_%s_%s_Rates.png"%(flavour,int_type,detector,selection)
             plt.savefig(filename)
             plt.close()
 
@@ -145,7 +145,7 @@ plt.axis([0,80,ymin,1.1*ymax])
 plt.yscale('log')
 plt.legend(loc='upper right')
 plt.title(histtitle)
-filename = "%s_Rates.png"%('nuall_nc')
+filename = "%s_%s_%s_Rates.png"%('nuall_nc',detector,selection)
 plt.savefig(filename)
 plt.close()
 
@@ -160,7 +160,7 @@ plt.axis([0,80,ymin,1.1*ymax])
 plt.yscale('log')
 plt.legend(loc='upper right')
 plt.title(histtitle)
-filename = "%s_Rates.png"%('nubarall_nc')
+filename = "%s_%s_%s_Rates.png"%('nubarall_nc',detector,selection)
 plt.savefig(filename)
 plt.close()
 
@@ -195,10 +195,10 @@ plt.axis([0,80,ymin,1.1*ymax])
 plt.yscale('log')
 plt.legend(loc='upper right',ncol=2)
 plt.title(histtitle)
-filename = "AllFlavours_RatesFullRange.png"
+filename = "AllFlavours_%s_%s_RatesFullRange.png"%(detector,selection)
 plt.savefig(filename)
 plt.axis([0,80,1e-7,1.3e-3])
-filename = "AllFlavours_Rates.png"
+filename = "AllFlavours_%s_%s_Rates.png"%(detector,selection)
 plt.savefig(filename)
 plt.close()
                 

@@ -20,7 +20,7 @@ parser.add_argument('--selection',type=str,default='',
 args = parser.parse_args()
 
 detector = args.detector
-selection = args.selection + ' Event Selection'
+selection = args.selection
 posteriors = args.posteriors
 
 fh = json.load(open(args.llh_file))
@@ -62,7 +62,7 @@ for dkey in values.keys():
         labels = []
         labels.append(r"NO Best Fit - $\log\left[\mathcal{L}\left(\mathcal{H}_{IO}\right)/\mathcal{L}\left(\mathcal{H}_{NO}\right)\right]$")
         labels.append(r"IO Best Fit - $\log\left[\mathcal{L}\left(\mathcal{H}_{IO}\right)/\mathcal{L}\left(\mathcal{H}_{NO}\right)\right]$")
-        LLRtitle = '%s %s LLR Distributions for true NO'%(detector,selection)
+        LLRtitle = '%s %s Event Selection LLR Distributions for true NO (%i Trials)'%(detector,selection,len(values[dkey]['true_h_fiducial']['hypo_NMH']['llh']))
 
         colours = []
         colours.append('r')
@@ -72,7 +72,7 @@ for dkey in values.keys():
         labels = []
         labels.append(r"IO Best Fit - $\log\left[\mathcal{L}\left(\mathcal{H}_{IO}\right)/\mathcal{L}\left(\mathcal{H}_{NO}\right)\right]$")
         labels.append(r"NO Best Fit - $\log\left[\mathcal{L}\left(\mathcal{H}_{IO}\right)/\mathcal{L}\left(\mathcal{H}_{NO}\right)\right]$")
-        LLRtitle = '%s %s LLR Distributions for true IO'%(detector,selection)
+        LLRtitle = '%s %s Event Selection LLR Distributions for true IO (%i Trials)'%(detector,selection,len(values[dkey]['true_h_fiducial']['hypo_NMH']['llh']))
 
         colours = []
         colours.append('b')
@@ -124,7 +124,7 @@ for dkey in values.keys():
     plt.axvline(LLR_Mean_Val,color='k',ymax=float(LLRfalsehhistmax)/float(1.35*LLRhistmax),label='False H Mode LLR')
     plt.legend(['False H Mode LLR',labels[0],labels[1]],loc='upper left')
     plt.title(LLRtitle)
-    filename = "%s_LLRDistribution.png"%(dkey)
+    filename = "%s_%s_%s_LLRDistribution.png"%(dkey,detector,selection)
     plt.savefig(filename)
     plt.close()
 
@@ -138,7 +138,7 @@ print "NMH True sigma 2 sided (isf) = %.4f"%norm.isf(NMH_true_pval)
 # Now plot the posteriors
 if posteriors == True:
 
-    MainTitle = '%s %s Posterior'%(detector, selection)
+    MainTitle = '%s %s Event Selection Posterior'%(detector, selection)
     
     for dkey in values.keys():
         for fkey in values[dkey].keys():
@@ -227,7 +227,7 @@ if posteriors == True:
                                 PriorSig = paramsdict[systkey]['prior']['sigma']
                                 PriorFid = paramsdict[systkey]['prior']['fiducial']
                 
-                    filename = r"%s_%s_%s_%s_Posterior.png"%(dkey,fkey,hkey,systkey)
+                    filename = r"%s_%s_%s_%s_%s_%s_Posterior.png"%(dkey,fkey,hkey,systkey,detector,selection)
                     plt.hist(vals,bins=20)
                 
                     if dkey == 'true_NMH':
@@ -259,6 +259,8 @@ if posteriors == True:
                             if hkey == 'hypo_IMH':
                                 title += 'fit as IO'
 
+                    title += ' (%i Trials)'%len(vals)
+
                     currentylim = plt.ylim()[1]
                     plt.ylim(0,1.25*currentylim)
                 
@@ -285,7 +287,7 @@ if posteriors == True:
                     plt.savefig(filename)
                     plt.close()
 
-    MainTitle = '%s %s Posteriors'%(detector, selection)
+    MainTitle = '%s %s Event Selection Posteriors'%(detector, selection)
     
     for dkey in values.keys():
         for fkey in values[dkey].keys():
@@ -415,6 +417,8 @@ if posteriors == True:
                             if hkey == 'hypo_IMH':
                                 title += 'fit as IO'
 
+                    title += ' (%i Trials)'%len(vals)
+
                     currentylim = plt.ylim()[1]
                     plt.ylim(0,1.25*currentylim)
 
@@ -443,7 +447,7 @@ if posteriors == True:
                     subplot_num += 1
 
                 plt.suptitle(MainTitle+r'\\'+title, fontsize=36)
-                filename = r"%s_%s_%s_Posteriors.png"%(dkey,fkey,hkey)
+                filename = r"%s_%s_%s_%s_%s_Posteriors.png"%(dkey,fkey,hkey,detector,selection)
                 plt.tight_layout()
                 plt.subplots_adjust(top=0.8)
                 plt.savefig(filename)

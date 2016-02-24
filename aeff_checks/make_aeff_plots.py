@@ -19,13 +19,13 @@ args = parser.parse_args()
 fh = json.load(open(args.aeff_file))
 
 detector = args.detector
-selection = args.selection + ' Event Selection'
+selection = args.selection
 
 all_aeff_hists = {}
 nunctot = []
 nubarnctot = []
 
-histtitle = detector + ' ' + selection + ' ' + 'PISA Effective Areas'
+histtitle = detector + ' ' + selection + ' Event Selection ' + 'PISA Effective Areas'
 
 for flavour in fh.keys():
 
@@ -94,7 +94,8 @@ for flavour in fh.keys():
             plt.yscale('log')
             plt.legend(loc='lower right')
             plt.title(histtitle)
-            filename = "%s_%s_Aeff.png"%(flavour,int_type)
+            plt.grid()
+            filename = "%s_%s_%s_%s_Aeff.png"%(flavour,int_type,detector,selection)
             plt.savefig(filename)
             plt.close()
 
@@ -135,7 +136,8 @@ plt.axis([0,80,ymin,1.1*ymax])
 plt.yscale('log')
 plt.legend(loc='lower right')
 plt.title(histtitle)
-filename = "%s_Aeff.png"%('nuall_nc')
+plt.grid()
+filename = "%s_%s_%s_Aeff.png"%('nuall_nc',detector,selection)
 plt.savefig(filename)
 plt.close()
 
@@ -150,7 +152,8 @@ plt.axis([0,80,ymin,1.1*ymax])
 plt.yscale('log')
 plt.legend(loc='lower right')
 plt.title(histtitle)
-filename = "%s_Aeff.png"%('nubarall_nc')
+plt.grid()
+filename = "%s_%s_%s_Aeff.png"%('nubarall_nc',detector,selection)
 plt.savefig(filename)
 plt.close()
 
@@ -185,10 +188,11 @@ plt.axis([0,80,ymin,1.1*ymax])
 plt.yscale('log')
 plt.legend(loc='lower right')
 plt.title(histtitle)
-filename = "AllFlavours_AeffFullRange.png"
+plt.grid()
+filename = "AllFlavours_%s_%s_AeffFullRange.png"%(detector,selection)
 plt.savefig(filename)
 plt.axis([0,80,1e-7,1e-3])
-filename = "AllFlavours_Aeff.png"
+filename = "AllFlavours_%s_%s_Aeff.png"%(detector,selection)
 plt.savefig(filename)
 plt.close()
                 
