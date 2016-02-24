@@ -55,3 +55,36 @@ for dkey in all_data.keys():
                     plt.title('%s Value at Best Fit for data:NH|NH'%key)
                     plt.savefig('%s%s%sdata.png'%(dkey,hkey,key))
                     plt.close()
+
+                    if key == 'llh':
+                        minllh = min(vals[key])
+                        dllh = []
+                        for val in vals[key]:
+                            dllh.append(val-minllh)
+
+                        s2th23 = []
+                        for val in vals['theta23']:
+                            s2th23.append(math.sin(math.radians(val))*math.sin(math.radians(val)))
+                        x2 = np.array(s2th23)
+
+                        dm31 = []
+                        for val in vals['deltam31']:
+                            dm31.append(val*1000.0)
+                        y2 = np.array(dm31)
+
+                        z2 = np.array(dllh)
+                        z_min = z2.min()
+                        z_max = z2.max()
+                        if args.rows:
+                            z2 = z2.reshape((nrows, ncols))
+                        else:
+                            z2 = z2.reshape((nrows, ncols)).T
+
+                        plt.pcolor(x2,y2,z2, cmap='Blues', vmin=z_min, vmax=20.0)
+                        plt.axis([0.40, 0.54, 2.30, 2.60])
+                        plt.colorbar()
+                        plt.xlabel('sin^2 theta23')
+                        plt.ylabel('deltam31 [10^-3 eV^2]')
+                        plt.title('delta%s Value at Best Fit for data:NH|NH'%key)
+                        plt.savefig('%s%sdelta%sdata.png'%(dkey,hkey,key))
+                        plt.close()
