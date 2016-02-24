@@ -95,7 +95,7 @@ for flavour in fh.keys():
             ymax = max(rates_1D_map)
             
             plt.xlabel(r'Energy [GeV]')
-            plt.ylabel(r'$\mathrm{A}_{eff}$')
+            plt.ylabel(r'Oscillated Event Rate (Hz)')
             plt.axis([0,80,ymin,1.1*ymax])
             plt.yscale('log')
             plt.legend(loc='upper right')
@@ -138,7 +138,7 @@ plt.hist(ebincens, bins=ebins, weights=nunctot,
          histtype='step', label=r'$\nu_{all}$ NC %.2f mHz'%(total_nc_rate), color='k',
          linestyle = all_rates_hists['nuallnc']['style'])
 plt.xlabel(r'Energy [GeV]')
-plt.ylabel(r'Event Rate ')
+plt.ylabel(r'Oscillated Event Rate (Hz)')
 ymin = min(a for a in nunctot if a != 0)
 ymax = max(nunctot)
 plt.axis([0,80,ymin,1.1*ymax])
@@ -153,7 +153,7 @@ plt.hist(ebincens, bins=ebins, weights=nubarnctot,
          histtype='step', label=r'$\bar{\nu}_{all}$ NC %.2f mHz'%(total_ncbar_rate), color='k',
          linestyle = all_rates_hists['nubarallnc']['style'])
 plt.xlabel(r'Energy [GeV]')
-plt.ylabel(r'$\mathrm{A}_{eff}$')
+plt.ylabel(r'Oscillated Event Rate (Hz)')
 ymin = min(a for a in nubarnctot if a != 0)
 ymax = max(nubarnctot)
 plt.axis([0,80,ymin,1.1*ymax])
@@ -190,15 +190,16 @@ for key in all_rates_hists.keys():
              linestyle = all_rates_hists[key]['style'])
         
 plt.xlabel(r'Energy [GeV]')
-plt.ylabel(r'$\mathrm{A}_{eff}$')
+plt.ylabel(r'Oscillated Event Rate (Hz)')
 plt.axis([0,80,ymin,1.1*ymax])
 plt.yscale('log')
 plt.legend(loc='upper right',ncol=2)
+plt.grid()
 plt.title(histtitle)
-filename = "AllFlavours_%s_%s_RatesFullRange.png"%(detector,selection)
+filename = "AllFlavours_%s_%s_OscRatesFullRange.png"%(detector,selection)
 plt.savefig(filename)
 plt.axis([0,80,1e-7,1.3e-3])
-filename = "AllFlavours_%s_%s_Rates.png"%(detector,selection)
+filename = "AllFlavours_%s_%s_OscRates.png"%(detector,selection)
 plt.savefig(filename)
 plt.close()
                 
