@@ -28,7 +28,7 @@ for dkey in all_data.keys():
                             importantsystvalue[dkey][afkey][hkey][key] = fh[dkey][afkey][hkey][key]*180/math.pi
                         else:
                             importantsystvalue[dkey][afkey][hkey][key] = fh[dkey][afkey][hkey][key]
-            
+
                 for systkey in all_data[dkey][afkey][hkey].keys():
                 
                     vals = {}
@@ -65,4 +65,6 @@ for dkey in all_data.keys():
                     plt.axhline(importantsystvalue[dkey][afkey][hkey]['llh'],linestyle='dashed',label='Minimiser LLH Value')
                     plt.legend()
                     plt.savefig('%s%s%s%s1DLLHSurface.png'%(dkey,hkey,afkey,systkey))
+                    plt.axis([xmin,xmax,0.999*importantsystvalue[dkey][afkey][hkey]['llh'],1.001*importantsystvalue[dkey][afkey][hkey]['llh']])
+                    plt.savefig('%s%s%s%s1DLLHSurfaceZoomed.png'%(dkey,hkey,afkey,systkey))
                     plt.close()
