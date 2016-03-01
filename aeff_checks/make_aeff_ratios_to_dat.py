@@ -106,7 +106,7 @@ flavour = 'nue'
 int_type = 'cc'
 title = r'$\nu_e$ CC'
 colour = 'r'
-aeff_1D_map = np.loadtxt("Data/DC/mlarson/16-01/Aeff/FromI3/nue_CC_effective_areas_vs_energy_uponly.dat",usecols=[1])
+aeff_1D_map = np.loadtxt("Data/DC/mlarson/16-01/Aeff/FromI3/nue_CC_DeepCore_NBI_effective_areas_vs_energy_uponly.dat",usecols=[1])
 all_msu_aeff_hists[flavour+int_type] = {}
 all_msu_aeff_hists[flavour+int_type]['hist'] = aeff_1D_map
 all_msu_aeff_hists[flavour+int_type]['title'] = title
@@ -117,7 +117,7 @@ flavour = 'numu'
 int_type = 'cc'
 title = r'$\nu_{\mu}$ CC'
 colour = 'b'
-aeff_1D_map = np.loadtxt("Data/DC/mlarson/16-01/Aeff/FromI3/numu_CC_effective_areas_vs_energy_uponly.dat",usecols=[1])
+aeff_1D_map = np.loadtxt("Data/DC/mlarson/16-01/Aeff/FromI3/numu_CC_DeepCore_NBI_effective_areas_vs_energy_uponly.dat",usecols=[1])
 all_msu_aeff_hists[flavour+int_type] = {}
 all_msu_aeff_hists[flavour+int_type]['hist'] = aeff_1D_map
 all_msu_aeff_hists[flavour+int_type]['title'] = title
@@ -128,7 +128,7 @@ flavour = 'nutau'
 int_type = 'cc'
 title = r'$\nu_{\tau}$ CC'
 colour = 'g'
-aeff_1D_map = np.loadtxt("Data/DC/mlarson/16-01/Aeff/FromI3/nutau_CC_effective_areas_vs_energy_uponly.dat",usecols=[1])
+aeff_1D_map = np.loadtxt("Data/DC/mlarson/16-01/Aeff/FromI3/nutau_CC_DeepCore_NBI_effective_areas_vs_energy_uponly.dat",usecols=[1])
 all_msu_aeff_hists[flavour+int_type] = {}
 all_msu_aeff_hists[flavour+int_type]['hist'] = aeff_1D_map
 all_msu_aeff_hists[flavour+int_type]['title'] = title
@@ -137,7 +137,7 @@ all_msu_aeff_hists[flavour+int_type]['style'] = 'solid'
 
 
 all_msu_aeff_hists['nuallnc'] = {}
-all_msu_aeff_hists['nuallnc']['hist'] = np.loadtxt("Data/DC/mlarson/16-01/Aeff/FromI3/nu_nc_effective_areas_vs_energy_uponly.dat",usecols=[1])
+all_msu_aeff_hists['nuallnc']['hist'] = np.loadtxt("Data/DC/mlarson/16-01/Aeff/FromI3/nu_nc_DeepCore_NBI_effective_areas_vs_energy_uponly.dat",usecols=[1])
 all_msu_aeff_hists['nuallnc']['title'] = r'$\nu_{all}$ NC'
 all_msu_aeff_hists['nuallnc']['style'] = 'solid'
 all_msu_aeff_hists['nuallnc']['colour'] = 'k'
@@ -146,7 +146,7 @@ flavour = 'nue_bar'
 int_type = 'cc'
 title = r'$\bar{\nu}_e$ CC'
 colour = 'r'
-aeff_1D_map = np.loadtxt("Data/DC/mlarson/16-01/Aeff/FromI3/nuebar_CC_effective_areas_vs_energy_uponly.dat",usecols=[1])
+aeff_1D_map = np.loadtxt("Data/DC/mlarson/16-01/Aeff/FromI3/nuebar_CC_DeepCore_NBI_effective_areas_vs_energy_uponly.dat",usecols=[1])
 all_msu_aeff_hists[flavour+int_type] = {}
 all_msu_aeff_hists[flavour+int_type]['hist'] = aeff_1D_map
 all_msu_aeff_hists[flavour+int_type]['title'] = title
@@ -157,7 +157,7 @@ flavour = 'numu_bar'
 int_type = 'cc'
 title = r'$\bar{\nu}_{\mu}$ CC'
 colour = 'b'
-aeff_1D_map = np.loadtxt("Data/DC/mlarson/16-01/Aeff/FromI3/numubar_CC_effective_areas_vs_energy_uponly.dat",usecols=[1])
+aeff_1D_map = np.loadtxt("Data/DC/mlarson/16-01/Aeff/FromI3/numubar_CC_DeepCore_NBI_effective_areas_vs_energy_uponly.dat",usecols=[1])
 all_msu_aeff_hists[flavour+int_type] = {}
 all_msu_aeff_hists[flavour+int_type]['hist'] = aeff_1D_map
 all_msu_aeff_hists[flavour+int_type]['title'] = title
@@ -168,7 +168,7 @@ flavour = 'nutau_bar'
 int_type = 'cc'
 title = r'$\bar{\nu}_{\tau}$ CC'
 colour = 'g'
-aeff_1D_map = np.loadtxt("Data/DC/mlarson/16-01/Aeff/FromI3/nutaubar_CC_effective_areas_vs_energy_uponly.dat",usecols=[1])
+aeff_1D_map = np.loadtxt("Data/DC/mlarson/16-01/Aeff/FromI3/nutaubar_CC_DeepCore_NBI_effective_areas_vs_energy_uponly.dat",usecols=[1])
 all_msu_aeff_hists[flavour+int_type] = {}
 all_msu_aeff_hists[flavour+int_type]['hist'] = aeff_1D_map
 all_msu_aeff_hists[flavour+int_type]['title'] = title
@@ -177,7 +177,7 @@ all_msu_aeff_hists[flavour+int_type]['style'] = 'dashed'
 
 
 all_msu_aeff_hists['nubarallnc'] = {}
-all_msu_aeff_hists['nubarallnc']['hist'] = np.loadtxt("Data/DC/mlarson/16-01/Aeff/FromI3/nubar_nc_effective_areas_vs_energy_uponly.dat",usecols=[1])
+all_msu_aeff_hists['nubarallnc']['hist'] = np.loadtxt("Data/DC/mlarson/16-01/Aeff/FromI3/nubar_nc_DeepCore_NBI_effective_areas_vs_energy_uponly.dat",usecols=[1])
 all_msu_aeff_hists['nubarallnc']['title'] = r'$\bar{\nu}_{all}$ NC'
 all_msu_aeff_hists['nubarallnc']['style'] = 'dashed'
 all_msu_aeff_hists['nubarallnc']['colour'] = 'k'
