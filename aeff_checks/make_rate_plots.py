@@ -14,6 +14,8 @@ parser.add_argument('--detector',type=str,default='',
                     help="Name of detector to put in histogram titles")
 parser.add_argument('--selection',type=str,default='',
                     help="Name of selection to put in histogram titles")
+parser.add_argument('--unosc',action='store_true',default=False,
+                    help="Flag if plotting unosc event rates")
 args = parser.parse_args()
 
 fh = json.load(open(args.rates_file))
@@ -81,26 +83,32 @@ for flavour in fh.keys():
             title = flavourtitle + ' ' + inttitle
             all_rates_hists[flavour+int_type] = {}
             all_rates_hists[flavour+int_type]['hist'] = rates_1D_map
-            all_rates_hists[flavour+int_type]['title'] = title+' %.2f mHz'%(total_rate)
+            all_rates_hists[flavour+int_type]['title'] = title+' %.3f mHz'%(total_rate)
             all_rates_hists[flavour+int_type]['colour'] = colour
             if 'bar' in flavour:
                 all_rates_hists[flavour+int_type]['style'] = 'dashed'
             else:
                 all_rates_hists[flavour+int_type]['style'] = 'solid'
             plt.hist(ebincens, bins=ebins, weights=rates_1D_map,
-                     histtype='step', label=title+' %.2f mHz'%(total_rate), color=colour,
+                     histtype='step', label=title+' %.3f mHz'%(total_rate), color=colour,
                      linestyle = all_rates_hists[flavour+int_type]['style'])
 
             ymin = min(a for a in rates_1D_map if a != 0)
             ymax = max(rates_1D_map)
             
             plt.xlabel(r'Energy [GeV]')
-            plt.ylabel(r'Oscillated Event Rate (Hz)')
+            if args.unosc:
+                plt.ylabel(r'Unoscillated Event Rate (Hz)')
+            else:
+                plt.ylabel(r'Oscillated Event Rate (Hz)')
             plt.axis([0,80,ymin,1.1*ymax])
             plt.yscale('log')
             plt.legend(loc='upper right')
             plt.title(histtitle)
-            filename = "%s_%s_%s_%s_Rates.png"%(flavour,int_type,detector,selection)
+            if args.unosc:
+                filename = "%s_%s_%s_%s_UnOscRates.png"%(flavour,int_type,detector,selection)
+            else:
+                filename = "%s_%s_%s_%s_OscRates.png"%(flavour,int_type,detector,selection)
             plt.savefig(filename)
             plt.close()
 
@@ -124,43 +132,55 @@ for flavour in fh.keys():
 
 all_rates_hists['nuallnc'] = {}
 all_rates_hists['nuallnc']['hist'] = nunctot
-all_rates_hists['nuallnc']['title'] = r'$\nu_{all}$ NC %.2f mHz'%(total_nc_rate)
+all_rates_hists['nuallnc']['title'] = r'$\nu_{all}$ NC %.3f mHz'%(total_nc_rate)
 all_rates_hists['nuallnc']['style'] = 'solid'
 all_rates_hists['nuallnc']['colour'] = 'k'
 
 all_rates_hists['nubarallnc'] = {}
 all_rates_hists['nubarallnc']['hist'] = nubarnctot
-all_rates_hists['nubarallnc']['title'] = r'$\bar{\nu}_{all}$ NC %.2f mHz'%(total_ncbar_rate)
+all_rates_hists['nubarallnc']['title'] = r'$\bar{\nu}_{all}$ NC %.3f mHz'%(total_ncbar_rate)
 all_rates_hists['nubarallnc']['style'] = 'dashed'
 all_rates_hists['nubarallnc']['colour'] = 'k'
 
 plt.hist(ebincens, bins=ebins, weights=nunctot,
-         histtype='step', label=r'$\nu_{all}$ NC %.2f mHz'%(total_nc_rate), color='k',
+         histtype='step', label=r'$\nu_{all}$ NC %.3f mHz'%(total_nc_rate), color='k',
          linestyle = all_rates_hists['nuallnc']['style'])
 plt.xlabel(r'Energy [GeV]')
-plt.ylabel(r'Oscillated Event Rate (Hz)')
+if args.unosc:
+    plt.ylabel(r'Unoscillated Event Rate (Hz)')
+else:
+    plt.ylabel(r'Oscillated Event Rate (Hz)')
 ymin = min(a for a in nunctot if a != 0)
 ymax = max(nunctot)
 plt.axis([0,80,ymin,1.1*ymax])
 plt.yscale('log')
 plt.legend(loc='upper right')
 plt.title(histtitle)
-filename = "%s_%s_%s_Rates.png"%('nuall_nc',detector,selection)
+if args.unosc:
+    filename = "%s_%s_%s_%s_UnOscRates.png"%('nuall_nc',int_type,detector,selection)
+else:
+    filename = "%s_%s_%s_%s_OscRates.png"%('nuall_nc',int_type,detector,selection)
 plt.savefig(filename)
 plt.close()
 
 plt.hist(ebincens, bins=ebins, weights=nubarnctot,
-         histtype='step', label=r'$\bar{\nu}_{all}$ NC %.2f mHz'%(total_ncbar_rate), color='k',
+         histtype='step', label=r'$\bar{\nu}_{all}$ NC %.3f mHz'%(total_ncbar_rate), color='k',
          linestyle = all_rates_hists['nubarallnc']['style'])
 plt.xlabel(r'Energy [GeV]')
-plt.ylabel(r'Oscillated Event Rate (Hz)')
+if args.unosc:
+    plt.ylabel(r'Unoscillated Event Rate (Hz)')
+else:
+    plt.ylabel(r'Oscillated Event Rate (Hz)')
 ymin = min(a for a in nubarnctot if a != 0)
 ymax = max(nubarnctot)
 plt.axis([0,80,ymin,1.1*ymax])
 plt.yscale('log')
 plt.legend(loc='upper right')
 plt.title(histtitle)
-filename = "%s_%s_%s_Rates.png"%('nubarall_nc',detector,selection)
+if args.unosc:
+    filename = "%s_%s_%s_%s_UnOscRates.png"%('nubarall_nc',int_type,detector,selection)
+else:
+    filename = "%s_%s_%s_%s_OscRates.png"%('nubarall_nc',int_type,detector,selection)
 plt.savefig(filename)
 plt.close()
 
@@ -190,16 +210,20 @@ for key in all_rates_hists.keys():
              linestyle = all_rates_hists[key]['style'])
         
 plt.xlabel(r'Energy [GeV]')
-plt.ylabel(r'Oscillated Event Rate (Hz)')
+if args.unosc:
+    plt.ylabel(r'Unoscillated Event Rate (Hz)')
+else:
+    plt.ylabel(r'Oscillated Event Rate (Hz)')
+plt.legend(bbox_to_anchor=(0.45, 0.80, 0.53, 0.80), loc=3,
+           ncol=2, mode="expand", borderaxespad=0.,
+           fontsize = 10)
 plt.axis([0,80,ymin,1.1*ymax])
-plt.yscale('log')
-plt.legend(loc='upper right',ncol=2)
 plt.grid()
 plt.title(histtitle)
-filename = "AllFlavours_%s_%s_OscRatesFullRange.png"%(detector,selection)
-plt.savefig(filename)
-plt.axis([0,80,1e-7,1.3e-3])
-filename = "AllFlavours_%s_%s_OscRates.png"%(detector,selection)
+if args.unosc:
+    filename = "AllFlavours_%s_%s_UnOscRatesFullRange.png"%(detector,selection)
+else:
+    filename = "AllFlavours_%s_%s_OscRatesFullRange.png"%(detector,selection)
 plt.savefig(filename)
 plt.close()
                 
