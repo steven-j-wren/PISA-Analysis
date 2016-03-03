@@ -181,7 +181,7 @@ for dkey in values.keys():
     plt.ylabel(r'Number of Trials')
     plt.ylim(0,plot_scaling_factor*LLRhistmax)
     plt.axvline(LLR_FalseH_Median_Val,color='k',ymax=float(LLRfalsehhistmax)/float(plot_scaling_factor*LLRhistmax),label='False H Median LLR (%.4f)'%LLR_FalseH_Median_Val)
-    plt.axvline(LLR_TrueH_Median_Val,color='',ymax=float(LLRfalsehhistmax)/float(plot_scaling_factor*LLRhistmax),label='True H Median LLR (%.4f)'%LLR_TrueH_Median_Val)
+    plt.axvline(LLR_TrueH_Median_Val,color='g',ymax=float(LLRfalsehhistmax)/float(plot_scaling_factor*LLRhistmax),label='True H Median LLR (%.4f)'%LLR_TrueH_Median_Val)
     plt.legend(['False H Median LLR','True H Median LLR',labels[0],labels[1]],loc='upper left')
     plt.title(LLRtitle)
     filename = "%s_%s_%s_LLRDistribution.png"%(dkey,detector,selection)
