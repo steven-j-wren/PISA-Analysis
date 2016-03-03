@@ -12,6 +12,10 @@ from pisa.utils.jsons import from_json
 
 parser = ArgumentParser(description='''Determines the false_h_best fiducial distribution, under the Gaussian assumption.''',
                         formatter_class=ArgumentDefaultsHelpFormatter)
+parser.add_argument('--detector',type=str,default='',
+                    help="Name of detector to put in histogram titles")
+parser.add_argument('--selection',type=str,default='',
+                    help="Name of selection to put in histogram titles")
 parser.add_argument('-tth','--three_true_h_fid_dir', type=str, required=True,
                     help="3yr true hierarchy fiducial directory")
 parser.add_argument('-fth','--three_false_h_best_fit_dir', type=str, required=True,
@@ -24,6 +28,8 @@ parser.add_argument('-v', '--verbose', action='count', default=None,
                     help='set verbosity level')
 args = parser.parse_args()
 
+detector = args.detector
+selection = args.selection
 three_true_h_fid_dir = args.three_true_h_fid_dir
 three_false_h_best_fit_dir = args.three_false_h_best_fit_dir
 ten_true_h_fid_dir = args.ten_true_h_fid_dir
@@ -90,9 +96,17 @@ for theta23 in theta23vals:
     for falseinfile in sorted(os.listdir(three_false_h_best_fit_dir)):
         if os.path.isfile(three_false_h_best_fit_dir+falseinfile):
             sin2theta23 = math.pow(math.sin(theta23),2)
-            splits1 = falseinfile.split('sin2theta23')
-            splits2 = splits1[-1].split('Data')
-            if "%.2f"%sin2theta23 == splits2[0]:
+            splits1 = falseinfile.lower().split('sin2theta23')
+            splits2 = splits1[-1].split('data')
+            try:
+                float(splits2[0])
+            except:
+                splits2 = splits2[0].split('_')
+            try:
+                RightFile = "%.4f"%sin2theta23 == splits2[0]
+            except:
+                RightFile = "%.2f"%sin2theta23 == splits2[0]
+            if RightFile == True:
                 indict = from_json(three_false_h_best_fit_dir+falseinfile)
                 for data_tag in indict['results'].keys():
                     if 'NMH' in data_tag or 'NH' in data_tag:
@@ -139,9 +153,17 @@ for theta23 in theta23vals:
     for falseinfile in sorted(os.listdir(ten_false_h_best_fit_dir)):
         if os.path.isfile(ten_false_h_best_fit_dir+falseinfile):
             sin2theta23 = math.pow(math.sin(theta23),2)
-            splits1 = falseinfile.split('sin2theta23')
-            splits2 = splits1[-1].split('Data')
-            if "%.2f"%sin2theta23 == splits2[0]:
+            splits1 = falseinfile.lower().split('sin2theta23')
+            splits2 = splits1[-1].split('data')
+            try:
+                float(splits2[0])
+            except:
+                splits2 = splits2[0].split('_')
+            try:
+                RightFile = "%.4f"%sin2theta23 == splits2[0]
+            except:
+                RightFile = "%.2f"%sin2theta23 == splits2[0]
+            if RightFile == True:
                 indict = from_json(ten_false_h_best_fit_dir+falseinfile)
                 for data_tag in indict['results'].keys():
                     if 'NMH' in data_tag or 'NH' in data_tag:
@@ -168,15 +190,26 @@ x = np.array(sin2theta23vals)
 xlabel = r"$\sin^2\theta_{23}$"
 xmin = 0.30
 xmax = 0.70
-ymin = 0.00
-ymax = 2.50
-title = "DeepCore NMO Significances for 3-10 years Livetime"
+title = "%s %s Event Selection NMO Significances for 3-10 years Livetime"%(detector, selection)
 filename = 'Sin2Theta23SignificancesLivetimeBands.png'
 
 ythTNH = np.array(three_significances['data_NMH'])
 ythTIH = np.array(three_significances['data_IMH'])
 yteTNH = np.array(ten_significances['data_NMH'])
 yteTIH = np.array(ten_significances['data_IMH'])
+
+ymaxes = []
+ymaxes.append(ythTNH.max())
+ymaxes.append(ythTIH.max())
+ymaxes.append(yteTNH.max())
+ymaxes.append(yteTIH.max())
+ymax = np.array(ymaxes).max()
+ymins = []
+ymins.append(ythTNH.min())
+ymins.append(ythTIH.min())
+ymins.append(yteTNH.min())
+ymins.append(yteTIH.min())
+ymin = np.array(ymins).min()
 
 plt.plot(x,ythTNH,color='r')
 plt.plot(x,ythTIH,color='b')
@@ -186,7 +219,7 @@ plt.plot(x,yteTIH,color='b')
 plt.fill_between(x, ythTNH, yteTNH, facecolor='red', alpha=0.5)
 plt.fill_between(x, ythTIH, yteTIH, facecolor='blue', alpha=0.5)
 
-plt.axis([xmin, xmax, ymin, ymax])
+plt.axis([xmin, xmax, ymin-0.1*ymax, 1.1*ymax])
 plt.legend(['Normal','Inverted'],loc='upper left')
 plt.xlabel(xlabel)
 plt.ylabel(r'Significance ($\sigma$)')

@@ -12,6 +12,10 @@ from pisa.utils.jsons import from_json
 
 parser = ArgumentParser(description='''Determines the false_h_best fiducial distribution, under the Gaussian assumption.''',
                         formatter_class=ArgumentDefaultsHelpFormatter)
+parser.add_argument('--detector',type=str,default='',
+                    help="Name of detector to put in histogram titles")
+parser.add_argument('--selection',type=str,default='',
+                    help="Name of selection to put in histogram titles")
 parser.add_argument('-tf','--first_true_h_fid_dir', type=str, required=True,
                     help="First octant true hierarchy fiducial directory")
 parser.add_argument('-ff','--first_false_h_best_fit_dir', type=str, required=True,
@@ -24,6 +28,8 @@ parser.add_argument('-v', '--verbose', action='count', default=None,
                     help='set verbosity level')
 args = parser.parse_args()
 
+detector = args.detector
+selection = args.selection
 first_true_h_fid_dir = args.first_true_h_fid_dir
 first_false_h_best_fit_dir = args.first_false_h_best_fit_dir
 second_true_h_fid_dir = args.second_true_h_fid_dir
@@ -82,8 +88,8 @@ for livetime in livetimevals:
     # Get chisquare values for false_h_best_fit distributions
     for falseinfile in sorted(os.listdir(first_false_h_best_fit_dir)):
         if os.path.isfile(first_false_h_best_fit_dir+falseinfile):
-            splits1 = falseinfile.split('livetime')
-            splits2 = splits1[-1].split('Data')
+            splits1 = falseinfile.lower().split('livetime')
+            splits2 = splits1[-1].split('data')
             if "%.2f"%livetime == splits2[0]:
                 indict = from_json(first_false_h_best_fit_dir+falseinfile)
                 for data_tag in indict['results'].keys():
@@ -128,8 +134,8 @@ for livetime in livetimevals:
     # Get chisquare values for false_h_best_fit distributions
     for falseinfile in sorted(os.listdir(second_false_h_best_fit_dir)):
         if os.path.isfile(second_false_h_best_fit_dir+falseinfile):
-            splits1 = falseinfile.split('livetime')
-            splits2 = splits1[-1].split('Data')
+            splits1 = falseinfile.lower().split('livetime')
+            splits2 = splits1[-1].split('data')
             if "%.2f"%livetime == splits2[0]:
                 indict = from_json(second_false_h_best_fit_dir+falseinfile)
                 for data_tag in indict['results'].keys():
@@ -157,15 +163,26 @@ x = np.array(livetimevals)
 xlabel = "Livetime [yrs]"
 xmin = 2.
 xmax = 11.
-ymin = 0.15
-ymax = 1.85
-title = r"DeepCore NMO Significances for $42.3^{\circ}<\theta_{23}<49.5^{\circ}$"
+title = r"%s %s Event Selection NMO Significances for $42.3^{\circ}<\theta_{23}<49.5^{\circ}$"%(detector, selection)
 filename = 'LivetimeSignificancesOctantDegeneracy.png'
 
 yfTNH = np.array(first_significances['data_NMH'])
 yfTIH = np.array(first_significances['data_IMH'])
 ysTNH = np.array(second_significances['data_NMH'])
 ysTIH = np.array(second_significances['data_IMH'])
+
+ymaxes = []
+ymaxes.append(yfTNH.max())
+ymaxes.append(yfTIH.max())
+ymaxes.append(ysTNH.max())
+ymaxes.append(ysTIH.max())
+ymax = np.array(ymaxes).max()
+ymins = []
+ymins.append(yfTNH.min())
+ymins.append(yfTIH.min())
+ymins.append(ysTNH.min())
+ymins.append(ysTIH.min())
+ymin = np.array(ymins).min()
 
 plt.plot(x,yfTNH,color='r')
 plt.plot(x,yfTIH,color='b')
@@ -175,7 +192,7 @@ plt.plot(x,ysTIH,color='b')
 plt.fill_between(x, yfTNH, ysTNH, facecolor='red', alpha=0.5)
 plt.fill_between(x, yfTIH, ysTIH, facecolor='blue', alpha=0.5)
 
-plt.axis([xmin, xmax, ymin, ymax])
+plt.axis([xmin, xmax, ymin-0.1*ymax, 1.1*ymax])
 plt.legend(['Normal','Inverted'],loc='upper left')
 plt.xlabel(xlabel)
 plt.ylabel(r'Significance ($\sigma$)')

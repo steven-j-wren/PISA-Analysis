@@ -12,6 +12,10 @@ from pisa.utils.jsons import from_json
 
 parser = ArgumentParser(description='''Determines the false_h_best fiducial distribution, under the Gaussian assumption.''',
                         formatter_class=ArgumentDefaultsHelpFormatter)
+parser.add_argument('--detector',type=str,default='',
+                    help="Name of detector to put in histogram titles")
+parser.add_argument('--selection',type=str,default='',
+                    help="Name of selection to put in histogram titles")
 parser.add_argument('-t','--true_h_fid_dir', type=str, required=True,
                     help="True hierarchy fiducial directory")
 parser.add_argument('-f','--false_h_best_fit_dir', type=str, required=True,
@@ -20,17 +24,16 @@ parser.add_argument('-th23','--theta23', action='store_true', default=False,
                     help="Analysing as a function of theta23")
 parser.add_argument('-l','--livetime', action='store_true', default=False,
                     help="Analysis as a function of livetime")
-parser.add_argument('--finer', action='store_true', default=False,
-                    help="Flag to use if finer binned in sin2theta23")
 parser.add_argument('-v', '--verbose', action='count', default=None,
                     help='set verbosity level')
 args = parser.parse_args()
 
+detector = args.detector
+selection = args.selection
 true_h_fid_dir = args.true_h_fid_dir
 false_h_best_fit_dir = args.false_h_best_fit_dir
 theta23analysis = args.theta23
 livetimeanalysis = args.livetime
-finer = args.finer
 
 theta23vals = []
 sin2theta23vals = []
@@ -95,11 +98,15 @@ for theta23 in theta23vals:
     for falseinfile in sorted(os.listdir(false_h_best_fit_dir)):
         if os.path.isfile(false_h_best_fit_dir+falseinfile):
             sin2theta23 = math.pow(math.sin(theta23),2)
-            splits1 = falseinfile.split('sin2theta23')
-            splits2 = splits1[-1].split('Data')
-            if finer == True:
+            splits1 = falseinfile.lower().split('sin2theta23')
+            splits2 = splits1[-1].split('data')
+            try:
+                float(splits2[0])
+            except:
+                splits2 = splits2[0].split('_')
+            try:
                 RightFile = "%.4f"%sin2theta23 == splits2[0]
-            else:
+            except:
                 RightFile = "%.2f"%sin2theta23 == splits2[0]
             if RightFile == True:
                 indict = from_json(false_h_best_fit_dir+falseinfile)
@@ -147,8 +154,8 @@ for livetime in livetimevals:
     # Get chisquare values for false_h_best_fit distributions
     for falseinfile in sorted(os.listdir(false_h_best_fit_dir)):
         if os.path.isfile(false_h_best_fit_dir+falseinfile):
-            splits1 = falseinfile.split('livetime')
-            splits2 = splits1[-1].split('Data')
+            splits1 = falseinfile.lower().split('livetime')
+            splits2 = splits1[-1].split('data')
             if "%.2f"%livetime == splits2[0]:
                 indict = from_json(false_h_best_fit_dir+falseinfile)
                 for data_tag in indict['results'].keys():
@@ -177,10 +184,8 @@ if theta23analysis == True:
     xlabel = r"$\sin^2\theta_{23}$"
     xmin = 0.30
     xmax = 0.70
-    ymin = 0.15
-    ymax = 1.30
-    title = "DeepCore NMO Significances for 3 years Livetime"
-    #title = "DeepCore NMO Significances for 10 years Livetime"
+    #title = "%s %s Event Selection NMO Significances for 3 years Livetime"%(detector,selection)
+    title = "%s %s Event Selection NMO Significances for 10 years Livetime"%(detector, selection)
     filename = 'Sin2Theta23Significances.png'
 
 if livetimeanalysis == True:
@@ -188,19 +193,32 @@ if livetimeanalysis == True:
     xlabel = "Livetime [yrs]"
     xmin = 2.
     xmax = 11.
-    ymin = 0.90
-    ymax = 1.90
-    title = r"DeepCore NMO Significances for Nu-Fit 2014 $\theta_{23}$ values"
-    #title = r"DeepCore NMO Significances for $\theta_{23}=42.3^{\circ}$"
-    #title = r"DeepCore NMO Significances for $\theta_{23}=49.5^{\circ}$"
+    #title = r"%s %s Event Selection NMO Significances for Nu-Fit 2014 $\theta_{23}$ values"%(detector,selection)
+    #title = r"%s %s Event Selection NMO Significances for $\theta_{23}=42.3^{\circ}$"%(detector,selection)
+    title = r"%s %s Event Selection NMO Significances for $\theta_{23}=49.5^{\circ}$"%(detector,selection)
     filename = 'LivetimeSignificances.png'
 
 yTNH = np.array(significances['data_NMH'])
 yTIH = np.array(significances['data_IMH'])
 
-plt.plot(x,yTNH,color='r',marker="o")
-plt.plot(x,yTIH,color='b',marker="o")
-#plt.axis([xmin, xmax, ymin, ymax])
+yTNHmin = yTNH.min()
+yTNHmax = yTNH.max()
+yTIHmin = yTIH.min()
+yTIHmax = yTIH.max()
+
+if yTNHmin < yTIHmin:
+    ymin = yTNHmin
+else:
+    ymin = yTIHmin
+
+if yTNHmax > yTIHmax:
+    ymax = yTNHmax
+else:
+    ymax = yTIHmax
+
+plt.plot(x,yTNH,color='r')
+plt.plot(x,yTIH,color='b')
+plt.axis([xmin, xmax, ymin-0.1*ymax, 1.1*ymax])
 plt.legend(['Normal','Inverted'],loc='upper left')
 plt.xlabel(xlabel)
 plt.ylabel(r'Significance ($\sigma$)')
