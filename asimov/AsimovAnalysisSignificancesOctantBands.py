@@ -164,7 +164,7 @@ xlabel = "Livetime [yrs]"
 xmin = 2.
 xmax = 11.
 title = r"%s %s Event Selection NMO Significances for $42.3^{\circ}<\theta_{23}<49.5^{\circ}$"%(detector, selection)
-filename = 'LivetimeSignificancesOctantDegeneracy.png'
+filename = '%s_%s_LivetimeSignificancesOctantDegeneracy.png'%(detector, selection)
 
 yfTNH = np.array(first_significances['data_NMH'])
 yfTIH = np.array(first_significances['data_IMH'])

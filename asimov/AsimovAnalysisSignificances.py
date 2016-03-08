@@ -184,9 +184,9 @@ if theta23analysis == True:
     xlabel = r"$\sin^2\theta_{23}$"
     xmin = 0.30
     xmax = 0.70
-    #title = "%s %s Event Selection NMO Significances for 3 years Livetime"%(detector,selection)
-    title = "%s %s Event Selection NMO Significances for 10 years Livetime"%(detector, selection)
-    filename = 'Sin2Theta23Significances.png'
+    title = "%s %s Event Selection NMO Significances for 3 years Livetime"%(detector,selection)
+    #title = "%s %s Event Selection NMO Significances for 10 years Livetime"%(detector, selection)
+    filename = '%s_%s_Sin2Theta23Significances.png'%(detector,selection)
 
 if livetimeanalysis == True:
     x = np.array(livetimevals)
@@ -196,7 +196,7 @@ if livetimeanalysis == True:
     #title = r"%s %s Event Selection NMO Significances for Nu-Fit 2014 $\theta_{23}$ values"%(detector,selection)
     #title = r"%s %s Event Selection NMO Significances for $\theta_{23}=42.3^{\circ}$"%(detector,selection)
     title = r"%s %s Event Selection NMO Significances for $\theta_{23}=49.5^{\circ}$"%(detector,selection)
-    filename = 'LivetimeSignificances.png'
+    filename = '%s_%s_LivetimeSignificances.png'%(detector,selection)
 
 yTNH = np.array(significances['data_NMH'])
 yTIH = np.array(significances['data_IMH'])
@@ -235,7 +235,7 @@ if theta23analysis == True:
     plt.axvline(NFFOSin2Theta23, linestyle='--', color='r', label='NO Best Fit)')
     plt.axvline(NFSOSin2Theta23, linestyle='--', color='b', label='IO Best Fit')
     plt.legend(['Normal','Inverted','NO Best Fit','IO Best Fit'],loc='upper left')
-    plt.savefig('Sin2Theta23SignificanceswBestFits.png')
+    plt.savefig('%s_%s_Sin2Theta23SignificanceswBestFits.png'%(detector,selection))
 
 
                         
