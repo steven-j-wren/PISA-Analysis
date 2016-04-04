@@ -1,6 +1,7 @@
 
 from argparse import ArgumentParser,ArgumentDefaultsHelpFormatter
 import matplotlib.pyplot as plt
+from matplotlib import cm
 plt.rcParams['text.usetex'] = True
 import numpy as np
 import json
@@ -21,7 +22,7 @@ titles['nue_bar'] = r'$\bar{\nu}_e$'
 titles['numu'] = r'$\nu_{\mu}$'
 titles['numu_bar'] = r'$\bar{\nu}_{\mu}$'
 
-HondaFluxTable = np.loadtxt(open_resource('/Users/steven/IceCube/PISA/pisa/pisa/resources/flux/spl-solmax-aa.d')).T
+HondaFluxTable = np.loadtxt(open_resource('/Users/steven/IceCube/PISA/pisa/pisa/resources/flux/spl-2015-solmax-aa.d')).T
 cols = ['energy']+primaries
 flux_dict = dict(zip(cols, HondaFluxTable))
 for key in flux_dict.iterkeys():
@@ -45,7 +46,7 @@ SIfh = json.load(open(args.SI_flux_file))
 
 for prim in primaries:
 
-    plottitle = 'Honda South Pole 2014 (SolMax)'
+    plottitle = 'Honda South Pole 2015 (SolMax)'
     
     Hondamapobj = {}
     Hondamapobj['ebins'] = flux_dict['ebins']
@@ -55,7 +56,7 @@ for prim in primaries:
     Hondalogmapobj = {}
     Hondalogmapobj['ebins'] = flux_dict['ebins']
     Hondalogmapobj['czbins'] = flux_dict['czbins']
-    Hondalogmapobj['map'] = np.log10(flux_dict[prim])
+    Hondalogmapobj['map'] = np.log10(Hondamapobj['map'])
 
     plt.figure(figsize = (8,5))
 
@@ -122,13 +123,13 @@ for prim in primaries:
     plt.title('Standard Interpolation')
 
     plt.subplot(1,4,3)
-    show_map(diffmapobj)
+    show_map(diffmapobj,cmap=cm.coolwarm)
     plt.xlabel(r'$\cos\theta_Z$')
     plt.ylabel(r'Energy [GeV]')
     plt.title('Difference between maps')
 
     plt.subplot(1,4,4)
-    show_map(ratiomapobj)
+    show_map(ratiomapobj,cmap=cm.coolwarm)
     plt.xlabel(r'$\cos\theta_Z$')
     plt.ylabel(r'Energy [GeV]')
     plt.title('Difference As Ratio to SI')
@@ -155,13 +156,13 @@ for prim in primaries:
     plt.title('Standard Interpolation')
 
     plt.subplot(1,4,3)
-    show_map(diffmapobj)
+    show_map(diffmapobj,cmap=cm.coolwarm)
     plt.xlabel(r'$\cos\theta_Z$')
     plt.ylabel(r'Energy [GeV]')
     plt.title('Difference between maps')
 
     plt.subplot(1,4,4)
-    show_map(ratiomapobj)
+    show_map(ratiomapobj,cmap=cm.coolwarm)
     plt.xlabel(r'$\cos\theta_Z$')
     plt.ylabel(r'Energy [GeV]')
     plt.title('Difference As Ratio to SI')
@@ -202,6 +203,11 @@ for prim in primaries:
     IPHondamapobj['czbins'] = flux_dict['czbins']
     IPHondamapobj['map'] = FinalArray
 
+    IPHondalogmapobj = {}
+    IPHondalogmapobj['ebins'] = flux_dict['ebins']
+    IPHondalogmapobj['czbins'] = flux_dict['czbins']
+    IPHondalogmapobj['map'] = np.log10(IPHondamapobj['map'])
+
     IPHondadiffmapobj = delta_map(Hondamapobj, IPHondamapobj)
     IPHondaratiomapobj = ratio_map(IPHondadiffmapobj, Hondamapobj)
 
@@ -210,31 +216,31 @@ for prim in primaries:
     plt.figure(figsize = (20,5))
 
     plt.subplot(1,5,1)
-    show_map(IPmapobj)
+    show_map(IPlogmapobj)
     plt.xlabel(r'$\cos\theta_Z$')
     plt.ylabel(r'Energy [GeV]')
     plt.title('Integral-Preserving')
     
     plt.subplot(1,5,2)
-    show_map(IPHondamapobj)
+    show_map(IPHondalogmapobj)
     plt.xlabel(r'$\cos\theta_Z$')
     plt.ylabel(r'Energy [GeV]')
     plt.title('Honda Binning')
 
     plt.subplot(1,5,3)
-    show_map(Hondamapobj)
+    show_map(Hondalogmapobj)
     plt.xlabel(r'$\cos\theta_Z$')
     plt.ylabel(r'Energy [GeV]')
     plt.title('Honda Tables')
 
     plt.subplot(1,5,4)
-    show_map(IPHondadiffmapobj)
+    show_map(IPHondadiffmapobj,cmap=cm.coolwarm)
     plt.xlabel(r'$\cos\theta_Z$')
     plt.ylabel(r'Energy [GeV]')
     plt.title('Difference between maps')
 
     plt.subplot(1,5,5)
-    show_map(IPHondaratiomapobj)
+    show_map(IPHondaratiomapobj,cmap=cm.coolwarm)
     plt.xlabel(r'$\cos\theta_Z$')
     plt.ylabel(r'Energy [GeV]')
     plt.title('Difference As Ratio to Honda')
@@ -275,6 +281,11 @@ for prim in primaries:
     SIHondamapobj['czbins'] = flux_dict['czbins']
     SIHondamapobj['map'] = FinalArray
 
+    SIHondalogmapobj = {}
+    SIHondalogmapobj['ebins'] = flux_dict['ebins']
+    SIHondalogmapobj['czbins'] = flux_dict['czbins']
+    SIHondalogmapobj['map'] = np.log10(SIHondamapobj['map'])
+
     SIHondadiffmapobj = delta_map(Hondamapobj, SIHondamapobj)
     SIHondaratiomapobj = ratio_map(SIHondadiffmapobj, Hondamapobj)
 
@@ -283,31 +294,31 @@ for prim in primaries:
     plt.figure(figsize = (20,5))
 
     plt.subplot(1,5,1)
-    show_map(SImapobj)
+    show_map(SIlogmapobj)
     plt.xlabel(r'$\cos\theta_Z$')
     plt.ylabel(r'Energy [GeV]')
     plt.title('Standard Interpolation')
     
     plt.subplot(1,5,2)
-    show_map(SIHondamapobj)
+    show_map(SIHondalogmapobj)
     plt.xlabel(r'$\cos\theta_Z$')
     plt.ylabel(r'Energy [GeV]')
     plt.title('Honda Binning')
 
     plt.subplot(1,5,3)
-    show_map(Hondamapobj)
+    show_map(Hondalogmapobj)
     plt.xlabel(r'$\cos\theta_Z$')
     plt.ylabel(r'Energy [GeV]')
     plt.title('Honda Tables')
 
     plt.subplot(1,5,4)
-    show_map(SIHondadiffmapobj)
+    show_map(SIHondadiffmapobj,cmap=cm.coolwarm)
     plt.xlabel(r'$\cos\theta_Z$')
     plt.ylabel(r'Energy [GeV]')
     plt.title('Difference between maps')
 
     plt.subplot(1,5,5)
-    show_map(SIHondaratiomapobj)
+    show_map(SIHondaratiomapobj,cmap=cm.coolwarm)
     plt.xlabel(r'$\cos\theta_Z$')
     plt.ylabel(r'Energy [GeV]')
     plt.title('Difference As Ratio to Honda')
