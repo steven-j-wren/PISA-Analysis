@@ -174,10 +174,11 @@ plt.plot(x,ysTIH,color='b',linestyle='--')
 
 plt.axis([xmin, xmax, ymin, ymax])
 plt.legend(['Normal','Inverted','NO, NuFit Priors w/o Ordering', 'IO, NuFit Priors w/o Ordering'],loc='upper left')
-plt.figtext(0.60,0.80,r'DEEPCORE\\PRELIMINARY',color='r',size='xx-large')
-plt.xlabel(xlabel)
-plt.ylabel(r'Significance ($\sigma$)')
-plt.title(title)
+plt.figtext(0.57,0.78,r'DEEPCORE\\PRELIMINARY',color='r',fontsize=28)
+plt.xlabel(xlabel,fontsize=30)
+plt.ylabel(r'Significance ($\sigma$)',fontsize=30)
+plt.title(title,size='x-large')
+plt.subplots_adjust(bottom=0.12)
 plt.savefig(filename)
 
 

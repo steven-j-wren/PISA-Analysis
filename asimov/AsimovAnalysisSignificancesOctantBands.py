@@ -24,12 +24,15 @@ parser.add_argument('-ts','--second_true_h_fid_dir', type=str, required=True,
                     help="First octant true hierarchy fiducial directory")
 parser.add_argument('-fs','--second_false_h_best_fit_dir', type=str, required=True,
                     help="First octant False hierarchy best fit directory")
+parser.add_argument('-p','--presentation',action='store_true',default=False,
+                    help="Flag if wanting to plots to have major swag")
 parser.add_argument('-v', '--verbose', action='count', default=None,
                     help='set verbosity level')
 args = parser.parse_args()
 
 detector = args.detector
 selection = args.selection
+presentation = args.presentation
 first_true_h_fid_dir = args.first_true_h_fid_dir
 first_false_h_best_fit_dir = args.first_false_h_best_fit_dir
 second_true_h_fid_dir = args.second_true_h_fid_dir
@@ -197,6 +200,14 @@ plt.legend(['Normal','Inverted'],loc='upper left')
 plt.xlabel(xlabel)
 plt.ylabel(r'Significance ($\sigma$)')
 plt.title(title)
+
+if presentation:
+    plt.xlabel(xlabel,fontsize=30)
+    plt.ylabel(r'Significance ($\sigma$)',fontsize=30)
+    plt.title(r'DeepCore NMO Significances for $42.3^{\circ}<\theta_{23}<49.5^{\circ}$',fontsize='x-large')
+    plt.annotate(r'DEEPCORE\\PRELIMINARY',xy=(0.26,0.84),xycoords='axes fraction',color='r',fontsize=28)
+    plt.subplots_adjust(bottom=0.12)
+
 plt.savefig(filename)
 
 

@@ -24,6 +24,8 @@ parser.add_argument('-th23','--theta23', action='store_true', default=False,
                     help="Analysing as a function of theta23")
 parser.add_argument('-l','--livetime', action='store_true', default=False,
                     help="Analysis as a function of livetime")
+parser.add_argument('-p','--presentation',action='store_true',default=False,
+                    help="Flag if wanting to plots to have major swag")
 parser.add_argument('-IB','--individual_bests',action='store_true',default=False,
                     help="Flag to plot best fit points individually")
 parser.add_argument('-CB','--combined_bests',action='store_true',default=False,
@@ -38,6 +40,7 @@ true_h_fid_dir = args.true_h_fid_dir
 false_h_best_fit_dir = args.false_h_best_fit_dir
 theta23analysis = args.theta23
 livetimeanalysis = args.livetime
+presentation = args.presentation
 IBests = args.individual_bests
 CBests = args.combined_bests
 
@@ -248,6 +251,12 @@ plt.legend(['Normal','Inverted'],loc='upper left')
 plt.xlabel(xlabel)
 plt.ylabel(r'Significance ($\sigma$)')
 plt.title(title)
+
+if presentation:
+    plt.xlabel(xlabel,size='x-large')
+    plt.ylabel(r'Significance ($\sigma$)',size='x-large')
+    plt.title(r'DeepCore NMO Significances for 3 years Livetime',size='x-large')
+
 plt.savefig(filename)
 
 if theta23analysis == True:
@@ -260,6 +269,14 @@ if theta23analysis == True:
     plt.axvline(NFFOSin2Theta23, linestyle='--', color='r', label='NO Best Fit)')
     plt.axvline(NFSOSin2Theta23, linestyle='--', color='b', label='IO Best Fit')
     plt.legend(['Normal','Inverted','NO Best Fit','IO Best Fit'],loc='upper left')
+
+    if presentation:
+        plt.xlabel(xlabel,fontsize=30, labelpad=10)
+        plt.ylabel(r'Significance ($\sigma$)',fontsize=30)
+        plt.title(r'DeepCore NMO Significances for 3 years Livetime',size='x-large')
+        plt.annotate(r'DEEPCORE\\PRELIMINARY',xy=(0.03,0.56),xycoords='axes fraction',color='r',fontsize=30)
+        plt.subplots_adjust(bottom=0.12)
+    
     plt.savefig('%s_%s_Sin2Theta23SignificanceswBestFits.png'%(detector,selection))
     plt.close()
 
