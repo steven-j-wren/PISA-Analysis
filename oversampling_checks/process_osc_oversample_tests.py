@@ -129,6 +129,9 @@ for oversample in NH_vals.keys():
 
                 plt.suptitle(plottitle)
 
+                plt.tight_layout()
+                plt.subplots_adjust(top=0.8)
+
                 plt.savefig(outdir+'%s_to_%s_oversampling%smaps.png'%(init_map_key,final_map_key,oversample))
 
                 plt.close()
@@ -269,6 +272,9 @@ for oversample in IH_vals.keys():
                 plt.title('Difference between maps as ratio')
 
                 plt.suptitle(plottitle)
+
+                plt.tight_layout()
+                plt.subplots_adjust(top=0.8)
 
                 plt.savefig(outdir+'%s_to_%s_oversampling%smaps.png'%(init_map_key,final_map_key,oversample))
 
