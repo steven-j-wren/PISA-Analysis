@@ -165,12 +165,31 @@ for dkey in values.keys():
     
     LLR_TrueH_Median_Val = np.median(LLRtrueh)
 
-    LLR_Test_Statistic = LLR_FalseH_Median_Val
+    # Approximate error on median as 1.25 * standard error.
+    # Only works if distribution is gaussian (mine is not!)
+    LLR_TrueH_StdDev = np.std(LLRtrueh)
+    LLR_TrueH_StdErr = np.std(LLRtrueh)/np.sqrt(len(LLRtrueh))
+    LLR_TrueH_Gauss_Median_Err = 1.25*LLR_TrueH_StdErr
+
+    # Find true error on median by sampling distribution
+    LLR_TrueH_Medians = []
+    for i in xrange(3000):
+        random = np.random.choice(LLRtrueh,size=5)
+        LLR_TrueH_Medians.append(np.median(random))
+    LLR_TrueH_MedDev = np.std(np.array(LLR_TrueH_Medians))
+    LLR_TrueH_MedErr = np.std(np.array(LLR_TrueH_Medians))/np.sqrt(len(LLR_TrueH_Medians))
+
+    LLR_Test_Statistic = LLR_TrueH_Median_Val
+    LLR_Test_Statistic_Err = LLR_TrueH_MedErr
 
     if dkey == 'true_IMH':
-        IMH_true_pval = float(np.sum(LLRtrueh < LLR_Test_Statistic))/len(LLRtrueh)
+        IMH_true_pval = float(np.sum(LLRfalseh > LLR_Test_Statistic))/len(LLRtrueh)
+        IMH_true_pval_P1S = float(np.sum(LLRfalseh > (LLR_Test_Statistic+LLR_Test_Statistic_Err)))/len(LLRtrueh)
+        IMH_true_pval_M1S = float(np.sum(LLRfalseh > (LLR_Test_Statistic-LLR_Test_Statistic_Err)))/len(LLRtrueh)
     if dkey == 'true_NMH':
-        NMH_true_pval = float(np.sum(LLRtrueh > LLR_Test_Statistic))/len(LLRtrueh)
+        NMH_true_pval = float(np.sum(LLRfalseh < LLR_Test_Statistic))/len(LLRtrueh)
+        NMH_true_pval_P1S = float(np.sum(LLRfalseh < (LLR_Test_Statistic+LLR_Test_Statistic_Err)))/len(LLRtrueh)
+        NMH_true_pval_M1S = float(np.sum(LLRfalseh < (LLR_Test_Statistic-LLR_Test_Statistic_Err)))/len(LLRtrueh)
 
     # Factor with which to make everything visible
     plot_scaling_factor = 1.55
@@ -189,11 +208,24 @@ for dkey in values.keys():
     plt.close()
 
 print "IMH True p-value = %.4f"%IMH_true_pval
-print "IMH True sigma 1 sided (erfinv) = %.4f"%(np.sqrt(2.0)*erfinv(1.0 - IMH_true_pval))
-print "IMH True sigma 2 sided (isf) = %.4f"%norm.isf(IMH_true_pval)
+print "    Plus 1 sigma on median, p-value = %.4f (Delta = %.4f)"%(IMH_true_pval_P1S, abs(IMH_true_pval_P1S-IMH_true_pval))
+print "    Minus 1 sigma on median, p-value = %.4f (Delta = %.4f)"%(IMH_true_pval_M1S, abs(IMH_true_pval_M1S-IMH_true_pval))
+print "IMH True sigma 2 sided (erfinv) = %.4f"%(np.sqrt(2.0)*erfinv(1.0 - IMH_true_pval))
+print "    IMH True sigma 2 sided (P1S) = %.4f (Delta = %.4f)"%((np.sqrt(2.0)*erfinv(1.0 - IMH_true_pval_P1S)), abs((np.sqrt(2.0)*erfinv(1.0 - IMH_true_pval_P1S))-(np.sqrt(2.0)*erfinv(1.0 - IMH_true_pval))))
+print "    IMH True sigma 2 sided (M1S) = %.4f (Delta = %.4f)"%((np.sqrt(2.0)*erfinv(1.0 - IMH_true_pval_M1S)), abs((np.sqrt(2.0)*erfinv(1.0 - IMH_true_pval_M1S))-(np.sqrt(2.0)*erfinv(1.0 - IMH_true_pval))))
+print "IMH True sigma 1 sided (isf) = %.4f"%norm.isf(IMH_true_pval)
+print "    IMH True sigma 1 sided (P1S) = %.4f (Delta = %.4f)"%(norm.isf(IMH_true_pval_P1S), abs(norm.isf(IMH_true_pval_P1S)-norm.isf(IMH_true_pval)))
+print "    IMH True sigma 1 sided (M1S) = %.4f (Delta = %.4f)"%(norm.isf(IMH_true_pval_M1S), abs(norm.isf(IMH_true_pval_M1S)-norm.isf(IMH_true_pval)))
+print ""
 print "NMH True p-value = %.4f"%NMH_true_pval
-print "NMH True sigma 1 sided (erfinv) = %.4f"%(np.sqrt(2.0)*erfinv(1.0 - NMH_true_pval))
-print "NMH True sigma 2 sided (isf) = %.4f"%norm.isf(NMH_true_pval)
+print "    Plus 1 sigma on median, p-value = %.4f (Delta = %.4f)"%(NMH_true_pval_P1S, abs(NMH_true_pval_P1S-NMH_true_pval))
+print "    Minus 1 sigma on median, p-value = %.4f (Delta = %.4f)"%(NMH_true_pval_M1S, abs(NMH_true_pval_M1S-NMH_true_pval))
+print "NMH True sigma 2 sided (erfinv) = %.4f"%(np.sqrt(2.0)*erfinv(1.0 - NMH_true_pval))
+print "    NMH True sigma 2 sided (P1S) = %.4f (Delta = %.4f)"%((np.sqrt(2.0)*erfinv(1.0 - NMH_true_pval_P1S)), abs((np.sqrt(2.0)*erfinv(1.0 - NMH_true_pval_P1S))-(np.sqrt(2.0)*erfinv(1.0 - NMH_true_pval))))
+print "    NMH True sigma 2 sided (M1S) = %.4f (Delta = %.4f)"%((np.sqrt(2.0)*erfinv(1.0 - NMH_true_pval_M1S)), abs((np.sqrt(2.0)*erfinv(1.0 - NMH_true_pval_M1S))-(np.sqrt(2.0)*erfinv(1.0 - NMH_true_pval))))
+print "NMH True sigma 1 sided (isf) = %.4f"%norm.isf(NMH_true_pval)
+print "    NMH True sigma 1 sided (P1S) = %.4f (Delta = %.4f)"%(norm.isf(NMH_true_pval_P1S), abs(norm.isf(NMH_true_pval_P1S)-norm.isf(NMH_true_pval)))
+print "    NMH True sigma 1 sided (M1S) = %.4f (Delta = %.4f)"%(norm.isf(NMH_true_pval_M1S), abs(norm.isf(NMH_true_pval_M1S)-norm.isf(NMH_true_pval)))
 
 ############################################################
 
