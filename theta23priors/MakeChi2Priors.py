@@ -12,7 +12,7 @@ args = parser.parse_args()
 
 x, y = np.loadtxt(args.chi2_file,unpack=True)
 
-f = scipy.interpolate.splrep(x,y,s=0)
+f = scipy.interpolate.splrep(x,-y,s=0)
 
 wholedict = {}
 wholedict["params"] = {}
