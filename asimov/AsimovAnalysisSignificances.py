@@ -62,6 +62,14 @@ axislabels['icc_atmos_mu_scale'] = r"Muon Background Scale"
 axislabels['muon_background_scale'] = r"Muon Background Scale"
 axislabels['llh'] = r"Log Likelihood"
 axislabels['chisquare'] = r'$\chi^2$'
+axislabels['dom_eff'] = r'Dom Efficiency'
+axislabels['hole_ice'] = r'Hole Ice'
+axislabels['GENSYS_AhtBY'] = r'Bodek-Yang $A_{HT}$'
+axislabels['GENSYS_BhtBY'] = r'Bodek-Yang $B_{HT}$'
+axislabels['GENSYS_CV1uBY'] = r'Bodek-Yang $C_{\nu1u}$'
+axislabels['GENSYS_CV2uBY'] = r'Bodek-Yang $C_{\nu2u}$'
+axislabels['GENSYS_MaCCQE'] = r'CCQE $M_{A}$'
+axislabels['GENSYS_MaRES'] = r'Resonant $M_{A}$'
 
 theta23vals = []
 sin2theta23vals = []
@@ -212,8 +220,12 @@ if theta23analysis == True:
     xlabel = r"$\sin^2\theta_{23}$"
     xmin = 0.30
     xmax = 0.70
-    title = "%s %s Event Selection NMO Significances for 3 years Livetime"%(detector,selection)
-    #title = "%s %s Event Selection NMO Significances for 10 years Livetime"%(detector, selection)
+    if '3yr' in true_h_fid_dir:
+        title = "%s %s Event Selection NMO Significances for 3 years Livetime"%(detector,selection)
+    elif '10yr' in true_h_fid_dir:
+        title = "%s %s Event Selection NMO Significances for 10 years Livetime"%(detector, selection)
+    else:
+        title = "%s %s Event Selection NMO Significances"%(detector, selection)
     filename = '%s_%s_Sin2Theta23Significances.png'%(detector,selection)
 
 if livetimeanalysis == True:
@@ -221,13 +233,32 @@ if livetimeanalysis == True:
     xlabel = "Livetime [yrs]"
     xmin = 2.
     xmax = 11.
-    #title = r"%s %s Event Selection NMO Significances for Nu-Fit 2014 $\theta_{23}$ values"%(detector,selection)
-    #title = r"%s %s Event Selection NMO Significances for $\theta_{23}=42.3^{\circ}$"%(detector,selection)
-    title = r"%s %s Event Selection NMO Significances for $\theta_{23}=49.5^{\circ}$"%(detector,selection)
+    regime = true_h_fid_dir.split('/')[-3]
+    if regime == 'NuFit':
+        if 'NuFit2014' in true_h_fid_dir:
+            title = r"%s %s Event Selection NMO Significances for for Nu-Fit 2014 $\theta_{23}$ values"%(detector, selection)
+        elif 'NuFit2016' in true_h_fid_dir:
+            if 'LEM' in true_h_fid_dir:
+                title = r"%s %s Event Selection NMO Significances for Nu-Fit 2016 (LEM) $\theta_{23}$ values"%(detector, selection)
+            elif 'LID' in true_h_fid_dir:
+                title = r"%s %s Event Selection NMO Significances for Nu-Fit 2016 (LID) $\theta_{23}$ values"%(detector, selection)
+            else:
+                title = r"%s %s Event Selection NMO Significances for Nu-Fit 2016 $\theta_{23}$ values"%(detector, selection)
+        else:
+            title = r"%s %s Event Selection NMO Significances for for Nu-Fit $\theta_{23}$ values"%(detector, selection)
+    elif regime == 'FirstOctant':
+        title = r"%s %s Event Selection NMO Significances for $\theta_{23}=42.3^{\circ}$"%(detector,selection)
+    elif regime == 'Second Octant':
+        title = r"%s %s Event Selection NMO Significances for $\theta_{23}=49.5^{\circ}$"%(detector,selection)
+    else:
+        title = r"%s %s Event Selection NMO Significances"%(detector,selection)
     filename = '%s_%s_LivetimeSignificances.png'%(detector,selection)
 
 yTNH = np.array(significances['data_NMH'])
 yTIH = np.array(significances['data_IMH'])
+
+print yTNH[0]
+print yTIH[0]
 
 yTNHmin = yTNH.min()
 yTNHmax = yTNH.max()
@@ -243,6 +274,9 @@ if yTNHmax > yTIHmax:
     ymax = yTNHmax
 else:
     ymax = yTIHmax
+
+if ymin < 0.0:
+    ymin = 0.0
 
 plt.plot(x,yTNH,color='r')
 plt.plot(x,yTIH,color='b')
@@ -260,14 +294,26 @@ if presentation:
 plt.savefig(filename)
 
 if theta23analysis == True:
-    
-    NuFitFirstOctant = 0.7382742735936013
-    NuFitSecondOctant = 0.8639379797371931
-    NFFOSin2Theta23 = math.pow(math.sin(NuFitFirstOctant ),2)
-    NFSOSin2Theta23 = math.pow(math.sin(NuFitSecondOctant ),2)
 
-    plt.axvline(NFFOSin2Theta23, linestyle='--', color='r', label='NO Best Fit)')
-    plt.axvline(NFSOSin2Theta23, linestyle='--', color='b', label='IO Best Fit')
+    if 'NuFit2014' in true_h_fid_dir:
+        NuFitNOTh23 = 0.7382742735936013
+        NuFitIOTh23 = 0.8639379797371931
+        NuFitNOS2Th23 = math.pow(math.sin(NuFitNOTh23),2)
+        NuFitIOS2Th23 = math.pow(math.sin(NuFitIOTh23),2)
+    elif 'NuFit2016' in true_h_fid_dir:
+        if 'LEM' in true_h_fid_dir:
+            NuFitNOTh23 = 0.86044732123
+            NuFitIOTh23 = 0.86568330898
+            NuFitNOS2Th23 = math.pow(math.sin(NuFitNOTh23),2)
+            NuFitIOS2Th23 = math.pow(math.sin(NuFitIOTh23),2)
+        elif 'LID' in true_h_fid_dir:
+            NuFitNOTh23 = 0.73652894434
+            NuFitIOTh23 = 0.86219265048
+            NuFitNOS2Th23 = math.pow(math.sin(NuFitNOTh23),2)
+            NuFitIOS2Th23 = math.pow(math.sin(NuFitIOTh23),2)
+
+    plt.axvline(NuFitNOS2Th23, linestyle='--', color='r', label='NO Best Fit)')
+    plt.axvline(NuFitIOS2Th23, linestyle='--', color='b', label='IO Best Fit')
     plt.legend(['Normal','Inverted','NO Best Fit','IO Best Fit'],loc='upper left')
 
     if presentation:
@@ -276,7 +322,8 @@ if theta23analysis == True:
         plt.title(r'DeepCore NMO Significances for 3 years Livetime',size='x-large')
         plt.annotate(r'DEEPCORE\\PRELIMINARY',xy=(0.03,0.56),xycoords='axes fraction',color='r',fontsize=30)
         plt.subplots_adjust(bottom=0.12)
-    
+
+    plt.grid()
     plt.savefig('%s_%s_Sin2Theta23SignificanceswBestFits.png'%(detector,selection))
     plt.close()
 
@@ -406,8 +453,8 @@ if IBests == True or CBests == True:
         # Get chisquare values for false_h_best_fit distributions
         for falseinfile in sorted(os.listdir(false_h_best_fit_dir)):
             if os.path.isfile(false_h_best_fit_dir+falseinfile):
-                splits1 = falseinfile.split('livetime')
-                splits2 = splits1[-1].split('Data')
+                splits1 = falseinfile.lower().split('livetime')
+                splits2 = splits1[-1].split('data')
                 if "%.2f"%livetime == splits2[0]:
                     indict = from_json(false_h_best_fit_dir+falseinfile)
                     for data_tag in indict['results'].keys():
@@ -459,14 +506,35 @@ if IBests:
                 ftitle = 'False Hierarchy Best Fit'    
 
             if theta23analysis == True:
-                title = "%s %s Event Selection Best Fit Values for 3 years Livetime"%(detector,selection)
-                #title = "%s %s Event Selection Best Fit Values for 10 years Livetime"%(detector,selection)
+                regime = true_h_fid_dir.split('/')[-3]
+                if regime == '3yr':
+                    title = "%s %s Event Selection NMO Significances for 3 years Livetime"%(detector,selection)
+                elif regime == '10yr':
+                    title = "%s %s Event Selection NMO Significances for 10 years Livetime"%(detector, selection)
+                else:
+                    title = "%s %s Event Selection NMO Significances"%(detector, selection)
                 filename = '%s_%s_Sin2Theta23BestFitValues.png'%(detector,selection)
 
             if livetimeanalysis == True:
-                title = r"%s %s Event Selection Best Fit Values for Nu-Fit 2014 $\theta_{23}$ values"%(detector,selection)
-                #title = r"%s %s Event Selection Best Fit Values for $\theta_{23}=42.3^{\circ}$"%(detector,selection)
-                #title = r"%s %s Event Selection Best Fit Values for $\theta_{23}=49.5^{\circ}$"%(detector,selection)
+                regime = true_h_fid_dir.split('/')[-3]
+                if regime == 'NuFit':
+                    if 'NuFit2014' in true_h_fid_dir:
+                        title = r"%s %s Event Selection NMO Significances for for Nu-Fit 2014 $\theta_{23}$ values"%(detector, selection)
+                    elif 'NuFit2016' in true_h_fid_dir:
+                        if 'LEM' in true_h_fid_dir:
+                            title = r"%s %s Event Selection NMO Significances for Nu-Fit 2016 (LEM) $\theta_{23}$ values"%(detector, selection)
+                        elif 'LID' in true_h_fid_dir:
+                            title = r"%s %s Event Selection NMO Significances for Nu-Fit 2016 (LID) $\theta_{23}$ values"%(detector, selection)
+                        else:
+                            title = r"%s %s Event Selection NMO Significances for Nu-Fit 2016 $\theta_{23}$ values"%(detector, selection)
+                    else:
+                        title = r"%s %s Event Selection NMO Significances for for Nu-Fit $\theta_{23}$ values"%(detector, selection)
+                elif regime == 'FirstOctant':
+                    title = r"%s %s Event Selection NMO Significances for $\theta_{23}=42.3^{\circ}$"%(detector,selection)
+                elif regime == 'Second Octant':
+                    title = r"%s %s Event Selection NMO Significances for $\theta_{23}=49.5^{\circ}$"%(detector,selection)
+                else:
+                    title = r"%s %s Event Selection NMO Significances"%(detector,selection)
                 filename = '%s_%s_LivetimeBestFitValues.png'%(detector,selection)
 
             ylabel = axislabels[pkey]
@@ -479,8 +547,8 @@ if IBests:
 
             yminTHF = yTHF.min() - dyTHF*0.10
             ymaxTHF = yTHF.max() + dyTHF*0.10
-            yminFHB = yFHB.min() - dyTHF*0.10
-            ymaxFHB = yFHB.max() + dyTHF*0.10
+            yminFHB = yFHB.min() - dyFHB*0.10
+            ymaxFHB = yFHB.max() + dyFHB*0.10
 
             if yminTHF < yminFHB:
                 ymin = yminTHF
@@ -491,7 +559,7 @@ if IBests:
                 ymax = ymaxTHF
             else:
                 ymax = ymaxFHB
-        
+
             plt.plot(x,yTHF,color='r',marker="o")
             plt.plot(x,yFHB,color='b',marker="o")
             plt.axis([xmin, xmax, ymin, ymax])
@@ -507,8 +575,13 @@ if IBests:
 if CBests:
 
     if theta23analysis == True:
-        MainTitle = "%s %s Event Selection Best Fit Values for 3 years Livetime"%(detector,selection)
-        #MainTitle = "%s %s Event Selection Best Fit Values for 10 years Livetime"%(detector,selection)
+        regime = true_h_fid_dir.split('/')[-3]
+        if regime == '3yr':
+            MainTitle = "%s %s Event Selection NMO Significances for 3 years Livetime"%(detector,selection)
+        elif regime == '10yr':
+            MainTitle = "%s %s Event Selection NMO Significances for 10 years Livetime"%(detector, selection)
+        else:
+            MainTitle = "%s %s Event Selection NMO Significances"%(detector, selection)
 
         x = np.array(sin2theta23vals)
         xlabel = r"$\sin^2\theta_{23}$"
@@ -518,9 +591,25 @@ if CBests:
         basefilename = '%s_%s_Sin2Theta23BestFitValues.png'%(detector,selection)
 
     if livetimeanalysis == True:
-        MainTitle = r"%s %s Event Selection Best Fit Values for Nu-Fit 2014 $\theta_{23}$ values"%(detector,selection)
-        #MainTitle = r"%s %s Event Selection Best Fit Values for $\theta_{23}=42.3^{\circ}$"%(detector,selection)
-        #MainTitle = r"%s %s Event Selection Best Fit Values for $\theta_{23}=49.5^{\circ}$"%(detector,selection)
+        regime = true_h_fid_dir.split('/')[-3]
+        if regime == 'NuFit':
+            if 'NuFit2014' in true_h_fid_dir:
+                MainTitle = r"%s %s Event Selection NMO Significances for for Nu-Fit 2014 $\theta_{23}$ values"%(detector, selection)
+            elif 'NuFit2016' in true_h_fid_dir:
+                if 'LEM' in true_h_fid_dir:
+                    MainTitle = r"%s %s Event Selection NMO Significances for Nu-Fit 2016 (LEM) $\theta_{23}$ values"%(detector, selection)
+                elif 'LID' in true_h_fid_dir:
+                    MainTitle = r"%s %s Event Selection NMO Significances for Nu-Fit 2016 (LID) $\theta_{23}$ values"%(detector, selection)
+                else:
+                    MainTitle = r"%s %s Event Selection NMO Significances for Nu-Fit 2016 $\theta_{23}$ values"%(detector, selection)
+            else:
+                MainTitle = r"%s %s Event Selection NMO Significances for for Nu-Fit $\theta_{23}$ values"%(detector, selection)
+        elif regime == 'FirstOctant':
+            MainTitle = r"%s %s Event Selection NMO Significances for $\theta_{23}=42.3^{\circ}$"%(detector,selection)
+        elif regime == 'Second Octant':
+            MainTitle = r"%s %s Event Selection NMO Significances for $\theta_{23}=49.5^{\circ}$"%(detector,selection)
+        else:
+            MainTitle = r"%s %s Event Selection NMO Significances"%(detector,selection)
 
         basefilename = '%s_%s_LivetimeBestFitValues.png'%(detector,selection)
 
@@ -549,8 +638,8 @@ if CBests:
 
             yminTHF = yTHF.min() - dyTHF*0.10
             ymaxTHF = yTHF.max() + dyTHF*0.10
-            yminFHB = yFHB.min() - dyTHF*0.10
-            ymaxFHB = yFHB.max() + dyTHF*0.10
+            yminFHB = yFHB.min() - dyFHB*0.10
+            ymaxFHB = yFHB.max() + dyFHB*0.10
 
             if yminTHF < yminFHB:
                 ymin = yminTHF
@@ -579,8 +668,11 @@ if CBests:
         plt.close()
 
     for fkey in params['data_NMH'].keys():
-        plt.figure(figsize=(20,8))
         subplot_num = 1
+        num_rows = len(params['data_NMH']['true_h_fiducial'].keys())/6
+        plt.figure(figsize=(25,4*num_rows))
+        if len(params['data_NMH']['true_h_fiducial'].keys())%6 != 0:
+            num_rows += 1
         for pkey in params['data_NMH']['true_h_fiducial'].keys():
 
             if fkey == 'true_h_fiducial':
@@ -611,7 +703,7 @@ if CBests:
             else:
                 ymax = ymaxFHB
 
-            plt.subplot(2,5,subplot_num)
+            plt.subplot(num_rows,6,subplot_num)
             plt.plot(x,yTHF,color='r',marker="o")
             plt.plot(x,yFHB,color='b',marker="o")
             plt.axis([xmin, xmax, ymin, ymax])

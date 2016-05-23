@@ -200,6 +200,7 @@ plt.legend(['Normal','Inverted'],loc='upper left')
 plt.xlabel(xlabel)
 plt.ylabel(r'Significance ($\sigma$)')
 plt.title(title)
+plt.grid()
 
 if presentation:
     plt.xlabel(xlabel,fontsize=30)
@@ -207,6 +208,13 @@ if presentation:
     plt.title(r'DeepCore NMO Significances for $42.3^{\circ}<\theta_{23}<49.5^{\circ}$',fontsize='x-large')
     plt.annotate(r'DEEPCORE\\PRELIMINARY',xy=(0.26,0.84),xycoords='axes fraction',color='r',fontsize=28)
     plt.subplots_adjust(bottom=0.12)
+
+print "NH"
+print yfTNH[0]
+print ysTNH[0]
+print "IH"
+print yfTIH[0]
+print ysTIH[0]
 
 plt.savefig(filename)
 

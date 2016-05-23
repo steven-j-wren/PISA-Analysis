@@ -12,6 +12,10 @@ from pisa.utils.jsons import from_json
 
 parser = ArgumentParser(description='''Determines the false_h_best fiducial distribution, under the Gaussian assumption.''',
                         formatter_class=ArgumentDefaultsHelpFormatter)
+parser.add_argument('--detector',type=str,default='',
+                    help="Name of detector to put in histogram titles")
+parser.add_argument('--selection',type=str,default='',
+                    help="Name of selection to put in histogram titles")
 parser.add_argument('-tf','--free_true_h_fid_dir', type=str, required=True,
                     help="Free true hierarchy fiducial directory")
 parser.add_argument('-ff','--free_false_h_best_fit_dir', type=str, required=True,
@@ -28,6 +32,8 @@ parser.add_argument('-v', '--verbose', action='count', default=None,
                     help='set verbosity level')
 args = parser.parse_args()
 
+detector = args.detector
+selection = args.selection
 free_true_h_fid_dir = args.free_true_h_fid_dir
 free_false_h_best_fit_dir = args.free_false_h_best_fit_dir
 full_prior_true_h_fid_dir = args.full_prior_true_h_fid_dir
@@ -98,8 +104,8 @@ for livetime in livetimevals:
     # Get chisquare values for false_h_best_fit distributions
     for falseinfile in sorted(os.listdir(free_false_h_best_fit_dir)):
         if os.path.isfile(free_false_h_best_fit_dir+falseinfile):
-            splits1 = falseinfile.split('livetime')
-            splits2 = splits1[-1].split('Data')
+            splits1 = falseinfile.lower().split('livetime')
+            splits2 = splits1[-1].split('data')
             if "%.2f"%livetime == splits2[0]:
                 indict = from_json(free_false_h_best_fit_dir+falseinfile)
                 for data_tag in indict['results'].keys():
@@ -144,8 +150,8 @@ for livetime in livetimevals:
     # Get chisquare values for false_h_best_fit distributions
     for falseinfile in sorted(os.listdir(full_prior_false_h_best_fit_dir)):
         if os.path.isfile(full_prior_false_h_best_fit_dir+falseinfile):
-            splits1 = falseinfile.split('livetime')
-            splits2 = splits1[-1].split('Data')
+            splits1 = falseinfile.lower().split('livetime')
+            splits2 = splits1[-1].split('data')
             if "%.2f"%livetime == splits2[0]:
                 indict = from_json(full_prior_false_h_best_fit_dir+falseinfile)
                 for data_tag in indict['results'].keys():
@@ -190,8 +196,8 @@ for livetime in livetimevals:
     # Get chisquare values for false_h_best_fit distributions
     for falseinfile in sorted(os.listdir(shifted_prior_false_h_best_fit_dir)):
         if os.path.isfile(shifted_prior_false_h_best_fit_dir+falseinfile):
-            splits1 = falseinfile.split('livetime')
-            splits2 = splits1[-1].split('Data')
+            splits1 = falseinfile.lower().split('livetime')
+            splits2 = splits1[-1].split('data')
             if "%.2f"%livetime == splits2[0]:
                 indict = from_json(shifted_prior_false_h_best_fit_dir+falseinfile)
                 for data_tag in indict['results'].keys():
@@ -219,10 +225,20 @@ x = np.array(livetimevals)
 xlabel = "Livetime [yrs]"
 xmin = 2.
 xmax = 11.
-ymin = 0.10
-ymax = 1.75
-title = r"DeepCore NMO Significances for Nu-Fit 2014 $\theta_{23}$ values"
-filename = 'LivetimeSignificancesIncTwoPriors.png'
+
+if 'NuFit2014' in free_true_h_fid_dir:
+    title = r"%s %s Event Selection NMO Significances for for Nu-Fit 2014 $\theta_{23}$ values"%(detector, selection)
+elif 'NuFit2016' in free_true_h_fid_dir:
+    if 'LEM' in free_true_h_fid_dir:
+        title = r"%s %s Event Selection NMO Significances for Nu-Fit 2016 (LEM) $\theta_{23}$ values"%(detector, selection)
+    elif 'LID' in free_true_h_fid_dir:
+        title = r"%s %s Event Selection NMO Significances for Nu-Fit 2016 (LID) $\theta_{23}$ values"%(detector, selection)
+    else:
+        title = r"%s %s Event Selection NMO Significances for Nu-Fit 2016 $\theta_{23}$ values"%(detector, selection)
+else:
+    title = r"%s %s Event Selection NMO Significances for for Nu-Fit $\theta_{23}$ values"%(detector, selection)
+
+filename = '%s_%s_LivetimeSignificancesIncTwoPriors.png'%(detector, selection)
 
 yfTNH = np.array(free_significances['data_NMH'])
 yfTIH = np.array(free_significances['data_IMH'])
@@ -231,15 +247,32 @@ yfpTIH = np.array(full_prior_significances['data_IMH'])
 yspTNH = np.array(shifted_prior_significances['data_NMH'])
 yspTIH = np.array(shifted_prior_significances['data_IMH'])
 
-plt.plot(x,yfTNH,color='r')
-plt.plot(x,yfTIH,color='b')
-plt.plot(x,yfpTNH,color='r',linestyle='--')
-plt.plot(x,yfpTIH,color='b',linestyle='--')
-plt.plot(x,yspTNH,color='r',linestyle='-.')
-plt.plot(x,yspTIH,color='b',linestyle='-.')
+ymaxes = []
+ymaxes.append(yfTNH.max())
+ymaxes.append(yfTIH.max())
+ymaxes.append(yfpTNH.max())
+ymaxes.append(yfpTIH.max())
+ymaxes.append(yspTNH.max())
+ymaxes.append(yspTIH.max())
+ymax = np.array(ymaxes).max()
+ymins = []
+ymins.append(yfTNH.min())
+ymins.append(yfTIH.min())
+ymins.append(yfpTNH.min())
+ymins.append(yfpTIH.min())
+ymins.append(yspTNH.min())
+ymins.append(yspTIH.min())
+ymin = np.array(ymins).min()
 
-plt.axis([xmin, xmax, ymin, ymax])
-plt.legend(['Normal','Inverted','NO, NuFit Priors', 'IO, NuFit Priors', 'NO, NuFit Priors w/o Ordering', 'IO, NuFit Priors w/o Ordering'],loc='upper left',ncol=2)
+plt.plot(x,yfTNH,color='r',label='Normal')
+plt.plot(x,yfTIH,color='b',label='Inverted')
+plt.plot(x,yfpTNH,color='r',linestyle='--',label='NO, NuFit Priors')
+plt.plot(x,yfpTIH,color='b',linestyle='--',label='IO, NuFit Priors')
+plt.plot(x,yspTNH,color='r',linestyle='-.',label='NO, NuFit Priors w/o Ordering')
+plt.plot(x,yspTIH,color='b',linestyle='-.',label='IO, NuFit Priors w/o Ordering')
+
+plt.axis([xmin, xmax, ymin-0.1*ymax, 1.3*ymax])
+plt.legend(loc='upper left',ncol=2)
 plt.figtext(0.60,0.30,r'DEEPCORE\\PRELIMINARY',color='r',size='xx-large')
 plt.xlabel(xlabel)
 plt.ylabel(r'Significance ($\sigma$)')
