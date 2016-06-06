@@ -80,6 +80,8 @@ axislabels['aeff_scale'] = r"$A_{eff}$ Scale"
 axislabels['theta23_nh'] = r"$\theta_{23}$"
 axislabels['theta23_ih'] = r"$\theta_{23}$"
 axislabels['theta13'] = r"$\theta_{13}$"
+axislabels['theta13_ih'] = r"$\theta_{13}$"
+axislabels['theta13_nh'] = r"$\theta_{13}$"
 axislabels['energy_scale'] = r"Energy Scale"
 axislabels['atm_delta_index'] = r"Atmospheric Index"
 axislabels['deltam31_nh'] = r"$\Delta m^2_{31}$"
@@ -87,6 +89,8 @@ axislabels['deltam31_ih'] = r"$\Delta m^2_{31}$"
 axislabels['icc_atmos_mu_scale'] = r"Muon Background Scale"
 axislabels['muon_background_scale'] = r"Muon Background Scale"
 axislabels['llh'] = r"Log Likelihood"
+axislabels['dom_eff'] = r"DOM Efficiency"
+axislabels['hole_ice'] = r"Hole Ice"
 
 hypotitles = {}
 hypotitles['true_NMH'] = {}
@@ -243,12 +247,13 @@ if Iposteriors == True:
                 for systkey in values[dkey][fkey][hkey].keys():
                     
                     vals = np.array(values[dkey][fkey][hkey][systkey])  
-                    
-                    if systkey in ['theta23','deltam31']:
-                        if hkey == 'hypo_NMH':
-                            systkey += '_nh'
-                        if hkey == 'hypo_IMH':
-                            systkey += '_ih'
+
+                    if systkey != 'llh':
+                        if systkey not in paramsdict.keys():
+                            if hkey == 'hypo_NMH':
+                                systkey += '_nh'
+                            if hkey == 'hypo_IMH':
+                                systkey += '_ih'
 
                     TemplateFit = None
                     ParamInjected = None
@@ -259,6 +264,11 @@ if Iposteriors == True:
                     if systkey != 'llh':
                         if systkey in ['theta12', 'theta13', 'deltacp']:
                             ParamInjected = paramsdict[systkey]['value']*180.0/math.pi
+                        elif systkey in ['theta13_ih', 'theta13_nh']:
+                            if dkey == 'true_IMH':
+                                ParamInjected = paramsdict['theta13_ih']['value']*180.0/math.pi
+                            elif dkey == 'true_NMH':
+                                ParamInjected = paramsdict['theta13_nh']['value']*180.0/math.pi
                         elif systkey in ['theta23_ih', 'theta23_nh']:
                             if dkey == 'true_IMH':
                                 ParamInjected = paramsdict['theta23_ih']['value']*180.0/math.pi
@@ -304,8 +314,15 @@ if Iposteriors == True:
 
                         if paramsdict[systkey]['prior']['kind'] == 'gaussian':
                             if systkey == 'theta13':
-                                PriorSig = paramsdict[systkey]['prior']['sigma']*180.0/math.pi
-                                PriorFid = paramsdict[systkey]['prior']['fiducial']*180.0/math.pi
+                                PriorSig = paramsdict['theta13']['prior']['sigma']*180.0/math.pi
+                                PriorFid = paramsdict['theta13']['prior']['fiducial']*180.0/math.pi
+                            elif systkey in ['theta13_ih','theta13_nh']:
+                                if dkey == 'true_IMH':
+                                        PriorSig = paramsdict['theta13_ih']['prior']['sigma']*180.0/math.pi
+                                        PriorFid = paramsdict['theta13_ih']['prior']['fiducial']*180.0/math.pi
+                                elif dkey == 'true_NMH':
+                                        PriorSig = paramsdict['theta13_nh']['prior']['sigma']*180.0/math.pi
+                                        PriorFid = paramsdict['theta13_nh']['prior']['fiducial']*180.0/math.pi
                             else:
                                 PriorSig = paramsdict[systkey]['prior']['sigma']
                                 PriorFid = paramsdict[systkey]['prior']['fiducial']
@@ -356,18 +373,22 @@ if Cposteriors:
         for fkey in values[dkey].keys():
             for hkey in values[dkey][fkey].keys():
 
-                plt.figure(figsize=(20,8))
+                num_rows = len(values[dkey][fkey][hkey].keys())/4
+                if len(values[dkey][fkey][hkey].keys())%4 != 0:
+                    num_rows += 1
+                plt.figure(figsize=(20,5*num_rows+2))
                 subplot_num = 1
                 
                 for systkey in values[dkey][fkey][hkey].keys():
                     
-                    vals = np.array(values[dkey][fkey][hkey][systkey])   
-                    
-                    if systkey in ['theta23','deltam31']:
-                        if hkey == 'hypo_NMH':
-                            systkey += '_nh'
-                        if hkey == 'hypo_IMH':
-                            systkey += '_ih'
+                    vals = np.array(values[dkey][fkey][hkey][systkey])
+
+                    if systkey != 'llh':
+                        if systkey not in paramsdict.keys():
+                            if hkey == 'hypo_NMH':
+                                systkey += '_nh'
+                            if hkey == 'hypo_IMH':
+                                systkey += '_ih'
 
                     TemplateFit = None
                     ParamInjected = None
@@ -378,6 +399,11 @@ if Cposteriors:
                     if systkey != 'llh':
                         if systkey in ['theta12', 'theta13', 'deltacp']:
                             ParamInjected = paramsdict[systkey]['value']*180.0/math.pi
+                        elif systkey in ['theta13_ih', 'theta13_nh']:
+                            if dkey == 'true_IMH':
+                                ParamInjected = paramsdict['theta13_ih']['value']*180.0/math.pi
+                            elif dkey == 'true_NMH':
+                                ParamInjected = paramsdict['theta13_nh']['value']*180.0/math.pi
                         elif systkey in ['theta23_ih', 'theta23_nh']:
                             if dkey == 'true_IMH':
                                 ParamInjected = paramsdict['theta23_ih']['value']*180.0/math.pi
@@ -427,11 +453,18 @@ if Cposteriors:
                             if systkey == 'theta13':
                                 PriorSig = paramsdict[systkey]['prior']['sigma']*180.0/math.pi
                                 PriorFid = paramsdict[systkey]['prior']['fiducial']*180.0/math.pi
+                            elif systkey in ['theta13_ih','theta13_nh']:
+                                if dkey == 'true_IMH':
+                                        PriorSig = paramsdict['theta13_ih']['prior']['sigma']*180.0/math.pi
+                                        PriorFid = paramsdict['theta13_ih']['prior']['fiducial']*180.0/math.pi
+                                elif dkey == 'true_NMH':
+                                        PriorSig = paramsdict['theta13_nh']['prior']['sigma']*180.0/math.pi
+                                        PriorFid = paramsdict['theta13_nh']['prior']['fiducial']*180.0/math.pi
                             else:
                                 PriorSig = paramsdict[systkey]['prior']['sigma']
                                 PriorFid = paramsdict[systkey]['prior']['fiducial']
                 
-                    plt.subplot(2,5,subplot_num)
+                    plt.subplot(num_rows,4,subplot_num)
                     plt.hist(vals,bins=20)
                     
                     title = hypotitles[dkey][fkey][hkey]
@@ -543,7 +576,10 @@ if CIscatter:
                             xsystkey += '_ih'
                     if xsystkey != 'llh':
 
-                        plt.figure(figsize=(16,8))
+                        num_rows = len(values[dkey][fkey][hkey].keys())/4
+                        if len(values[dkey][fkey][hkey].keys())%4 != 0:
+                            num_rows += 1
+                        plt.figure(figsize=(20,5*num_rows+2))
                         subplot_num = 1
 
                         for ysystkey in values[dkey][fkey][hkey].keys():
@@ -555,7 +591,7 @@ if CIscatter:
                                     ysystkey += '_ih'
                             if ysystkey != 'llh' and ysystkey != xsystkey:
                                         
-                                plt.subplot(2,4,subplot_num)
+                                plt.subplot(num_rows,4,subplot_num)
                                 plt.scatter(xvals,yvals)
                                 rho, pval = spearmanr(xvals,yvals)
                                 if subplot_num <= 4:
