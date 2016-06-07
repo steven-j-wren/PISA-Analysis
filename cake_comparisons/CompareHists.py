@@ -27,19 +27,40 @@ titles['nue_bar'] = r'$\bar{\nu}_e$'
 titles['numu'] = r'$\nu_{\mu}$'
 titles['numu_bar'] = r'$\bar{\nu}_{\mu}$'
 
-cake_array = from_json(args.cake_file)
+titles['nue_cc'] = r'$\nu_e$ CC'
+titles['numu_cc'] = r'$\nu_{\mu}$ CC'
+titles['nutau_cc'] = r'$\nu_{\tau}$ CC'
+titles['nuall_nc'] = r'$\nu$ NC'
+
+titles['trck'] = r'Track-Like'
+titles['cscd'] = r'Cascade-Like'
+
+try:
+    cake_array = from_json(args.cake_file)['maps']
+except:
+    cake_array = from_json(args.cake_file)
+    
 pisa_dict = from_json(args.pisa_file)
 
 for cake_dict in cake_array:
+    
     pisa_map = pisa_dict[cake_dict['name']]
     cake_map = {}
     cake_map['map'] = cake_dict['hist'].T
 
     for binning in cake_dict['binning']['dimensions']:
         if binning['name'] == 'energy':
-            cake_map['ebins'] = binning['bin_edges'][0]
+            cake_map['ebins'] = binning['bin_edges']
         if binning['name'] == 'coszen':
-            cake_map['czbins'] = binning['bin_edges'][0]
+            cake_map['czbins'] = binning['bin_edges']
+        if binning['name'] == 'true_energy':
+            cake_map['ebins'] = binning['bin_edges']
+        if binning['name'] == 'true_coszen':
+            cake_map['czbins'] = binning['bin_edges']
+        if binning['name'] == 'reco_energy':
+            cake_map['ebins'] = binning['bin_edges']
+        if binning['name'] == 'reco_coszen':
+            cake_map['czbins'] = binning['bin_edges']
 
     RatioMapObj = ratio_map(cake_map, pisa_map)
     DiffMapObj = delta_map(pisa_map, cake_map)
