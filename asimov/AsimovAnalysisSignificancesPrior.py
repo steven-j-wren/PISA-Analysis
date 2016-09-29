@@ -164,19 +164,24 @@ xlabel = "Livetime [yrs]"
 xmin = 2.
 xmax = 11.
 
-if 'NuFit2014' in free_true_h_fid_dir:
+if 'NuFit2014' in prior_true_h_fid_dir:
     title = r"%s %s Event Selection NMO Significances for for Nu-Fit 2014 $\theta_{23}$ values"%(detector, selection)
-elif 'NuFit2016' in free_true_h_fid_dir:
-    if 'LEM' in free_true_h_fid_dir:
+elif 'NuFit2016' in prior_true_h_fid_dir:
+    if 'LEM' in prior_true_h_fid_dir:
         title = r"%s %s Event Selection NMO Significances for Nu-Fit 2016 (LEM) $\theta_{23}$ values"%(detector, selection)
-    elif 'LID' in free_true_h_fid_dir:
+    elif 'LID' in prior_true_h_fid_dir:
         title = r"%s %s Event Selection NMO Significances for Nu-Fit 2016 (LID) $\theta_{23}$ values"%(detector, selection)
     else:
         title = r"%s %s Event Selection NMO Significances for Nu-Fit 2016 $\theta_{23}$ values"%(detector, selection)
 else:
     title = r"%s %s Event Selection NMO Significances for for Nu-Fit $\theta_{23}$ values"%(detector, selection)
-    
-filename = '%s_%s_LivetimeSignificancesIncPriors.png'%(detector, selection)
+
+if '/Shifted/' in prior_true_h_fid_dir:
+    filename = '%s_%s_LivetimeSignificancesIncPriors.png'%(detector, selection)
+elif '/UnShifted/' in prior_true_h_fid_dir:
+    filename = '%s_%s_LivetimeSignificancesIncFullPriors.png'%(detector, selection)
+else:
+    filename = '%s_%s_LivetimeSignificancesIncPriors.png'%(detector, selection)
 
 yfTNH = np.array(free_significances['data_NMH'])
 yfTIH = np.array(free_significances['data_IMH'])
@@ -202,7 +207,14 @@ plt.plot(x,ysTNH,color='r',linestyle='--')
 plt.plot(x,ysTIH,color='b',linestyle='--')
 
 plt.axis([xmin, xmax, ymin-0.1*ymax, 1.3*ymax])
-plt.legend(['Normal','Inverted','NO, NuFit Priors w/o Ordering', 'IO, NuFit Priors w/o Ordering'],loc='upper left')
+
+if '/Shifted/' in free_true_h_fid_dir:
+    plt.legend(['Normal','Inverted','NO, NuFit Priors w/o Ordering', 'IO, NuFit Priors w/o Ordering'],loc='upper left')
+elif '/UnShifted/' in free_true_h_fid_dir:
+    plt.legend(['Normal','Inverted','NO, NuFit Priors', 'IO, NuFit Priors'],loc='upper left')
+else:
+    plt.legend(['Normal','Inverted','NO, NuFit Priors w/o Ordering', 'IO, NuFit Priors w/o Ordering'],loc='upper left')
+    
 plt.figtext(0.57,0.78,r'DEEPCORE\\PRELIMINARY',color='r',fontsize=28)
 plt.xlabel(xlabel,fontsize=30)
 plt.ylabel(r'Significance ($\sigma$)',fontsize=30)
