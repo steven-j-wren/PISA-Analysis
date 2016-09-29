@@ -1,4 +1,5 @@
 
+
 from argparse import ArgumentParser,ArgumentDefaultsHelpFormatter
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as PathEffects
@@ -7,8 +8,27 @@ import numpy as np
 import json
 import math
 
-from scipy.special import erfinv
+from scipy.special import erf, erfinv
 from scipy.stats import norm, spearmanr
+from scipy.optimize import curve_fit
+
+def pdf(x):
+    return 1/np.sqrt(2*np.pi) * np.exp(-x**2/2)
+
+def cdf(x):
+    return (1 + erf(x/np.sqrt(2))) / 2
+
+def skew(x,e=0,s=1,w=1,a=0):
+    t = (x-e) * w
+    return 2 * s * pdf(t) * cdf(a*t)
+
+def crystalball(x,s,a,n,xbar,sigma):
+    A = np.power(n/np.absolute(a),n)*np.exp(-np.absolute(a)**2/2)
+    B = n/np.absolute(a)-np.absolute(a)
+    C = n/np.absolute(a)*(1/(n-1))*np.exp(-np.absolute(a)**2/2)
+    D = np.sqrt(np.pi/2)*(1+erf(np.absolute(a)/np.sqrt(2)))
+    N = 1/(sigma*(C+D))
+    return np.piecewise(x, [(x-xbar)/sigma > -a], [lambda x:s*N*np.exp(-np.power(x-xbar,2)/(2*sigma**2)), lambda x:s*N*A*np.power((B-(x-xbar)/sigma),-n)])
 
 parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
 parser.add_argument('llh_file',type=str,help="Processed LLH files to analyze")
@@ -28,6 +48,8 @@ parser.add_argument('-CS','--combined_scatter',action='store_true',default=False
                     help="Flag to plot all 2D scatter on same figure")
 parser.add_argument('-CM','--correlation_matrix',action='store_true',default=False,
                     help="Flag to plot correlation matrices")
+parser.add_argument('-CT','--contour',action='store_true',default=False,
+                    help="Flag to plot atmospheric mixing contour")
 
 args = parser.parse_args()
 
@@ -39,10 +61,16 @@ Iscatter = args.individual_scatter
 CIscatter = args.combined_individual_scatter
 Cscatter = args.combined_scatter
 CMatrix = args.correlation_matrix
+Contour = args.contour
 
 fh = json.load(open(args.llh_file))
 paramsdict = fh['template_settings']['params']
 values = {}
+
+outdir = ""
+for bit in args.llh_file.split("/")[:-2]:
+    outdir += bit + "/"
+outdir += "Plots/"
 
 # First read in all the data and store in an easier dict
 for dkey in fh.keys():
@@ -130,19 +158,22 @@ for dkey in values.keys():
         colours = []
         colours.append('b')
         colours.append('r')
-        
+
+    binning = np.linspace(-2.5,1.0,len((values[dkey]['true_h_fiducial']['hypo_NMH']['llh']))/100)
+    binwidth = binning[1]-binning[0]
+    bin_centres = np.linspace(-2.5+binwidth,1.0-binwidth,len((values[dkey]['true_h_fiducial']['hypo_NMH']['llh']))/100-1)
     
     LLHtruehhypoNMH = np.array(values[dkey]['true_h_fiducial']['hypo_NMH']['llh'])
     LLHtruehhypoIMH = np.array(values[dkey]['true_h_fiducial']['hypo_IMH']['llh'])
     # Need a negative sign here because the optimizer returns the negative
     LLRtrueh = - ( LLHtruehhypoIMH - LLHtruehhypoNMH ) 
-    LLRtruehhist, LLRtruehbin_edges = np.histogram(LLRtrueh,bins=20)
+    LLRtruehhist, LLRtruehbin_edges = np.histogram(LLRtrueh,bins=binning)
     LLHfalsehhypoNMH = np.array(values[dkey]['false_h_best_fit']['hypo_NMH']['llh'])
     LLHfalsehhypoIMH = np.array(values[dkey]['false_h_best_fit']['hypo_IMH']['llh'])
     # Need a negative sign here because the optimizer returns the negative
     LLRfalseh = - ( LLHfalsehhypoIMH - LLHfalsehhypoNMH )
-    LLRfalsehhist, LLRfalsehbin_edges = np.histogram(LLRfalseh,bins=20)
-
+    LLRfalsehhist, LLRfalsehbin_edges = np.histogram(LLRfalseh,bins=binning)
+    
     LLRhistmax = 0
     LLRfalsehhistmax = 0
     LLRfalsehhistmaxbin = 0
@@ -178,7 +209,7 @@ for dkey in values.keys():
     # Find true error on median by sampling distribution
     LLR_TrueH_Medians = []
     for i in xrange(3000):
-        random = np.random.choice(LLRtrueh,size=5)
+        random = np.random.choice(LLRtrueh,size=50)
         LLR_TrueH_Medians.append(np.median(random))
     LLR_TrueH_MedDev = np.std(np.array(LLR_TrueH_Medians))
     LLR_TrueH_MedErr = np.std(np.array(LLR_TrueH_Medians))/np.sqrt(len(LLR_TrueH_Medians))
@@ -190,25 +221,93 @@ for dkey in values.keys():
         IMH_true_pval = float(np.sum(LLRfalseh > LLR_Test_Statistic))/len(LLRtrueh)
         IMH_true_pval_P1S = float(np.sum(LLRfalseh > (LLR_Test_Statistic+LLR_Test_Statistic_Err)))/len(LLRtrueh)
         IMH_true_pval_M1S = float(np.sum(LLRfalseh > (LLR_Test_Statistic-LLR_Test_Statistic_Err)))/len(LLRtrueh)
+        p_value = IMH_true_pval
+        dp1s = IMH_true_pval_P1S - IMH_true_pval
+        dm1s = IMH_true_pval_M1S - IMH_true_pval
+        if dp1s < 0.0:
+            p1s = dm1s
+            m1s = np.abs(dp1s)
+        else:
+            p1s = dp1s
+            m1s = np.abs(dm1s)
     if dkey == 'true_NMH':
         NMH_true_pval = float(np.sum(LLRfalseh < LLR_Test_Statistic))/len(LLRtrueh)
         NMH_true_pval_P1S = float(np.sum(LLRfalseh < (LLR_Test_Statistic+LLR_Test_Statistic_Err)))/len(LLRtrueh)
         NMH_true_pval_M1S = float(np.sum(LLRfalseh < (LLR_Test_Statistic-LLR_Test_Statistic_Err)))/len(LLRtrueh)
+        p_value = NMH_true_pval
+        dp1s = NMH_true_pval_P1S - NMH_true_pval
+        dm1s = NMH_true_pval_M1S - NMH_true_pval
+        if dp1s < 0.0:
+            p1s = dm1s
+            m1s = np.abs(dp1s)
+        else:
+            p1s = dp1s
+            m1s = np.abs(dm1s)
 
     # Factor with which to make everything visible
     plot_scaling_factor = 1.55
     
-    plt.hist(LLRtrueh,bins=20,color=colours[0],histtype='step')
-    plt.hist(LLRfalseh,bins=20,color=colours[1],histtype='step')
+    plt.hist(LLRtrueh,bins=binning,color=colours[0],histtype='step')
+    plt.hist(LLRfalseh,bins=binning,color=colours[1],histtype='step')
     plt.xlabel(r'Log-Likelihood Ratio')
-    plt.ylabel(r'Number of Trials')
+    plt.ylabel(r'Number of Trials (per %.2f)'%binwidth)
     plt.ylim(0,plot_scaling_factor*LLRhistmax)
     plt.axvline(LLR_FalseH_Median_Val,color='k',ymax=float(LLRfalsehhistmax)/float(plot_scaling_factor*LLRhistmax),label='False H Median LLR (%.4f)'%LLR_FalseH_Median_Val)
     plt.axvline(LLR_TrueH_Median_Val,color='g',ymax=float(LLRfalsehhistmax)/float(plot_scaling_factor*LLRhistmax),label='True H Median LLR (%.4f)'%LLR_TrueH_Median_Val)
     plt.legend(['False H Median LLR','True H Median LLR',labels[0],labels[1]],loc='upper left')
     plt.title(LLRtitle)
-    filename = "%s_%s_%s_LLRDistribution.png"%(dkey,detector,selection)
-    plt.savefig(filename)
+    filename = "%s_%s_%s_LLRDistribution_%i_Trials.png"%(dkey,detector,selection,len(values[dkey]['true_h_fiducial']['hypo_NMH']['llh']))
+    plt.figtext(0.15,0.60,r'p-value = $%.4f^{+%.4f}_{-%.4f}$'%(p_value,p1s,m1s),color='k',size='xx-large')
+    plt.subplots_adjust(bottom=0.12)
+    plt.savefig(outdir+"LLRDistributions/"+filename)
+    plt.close()
+
+    p0 = [0.3,600.0,2.5,-4.5]
+
+    truehOpt, truehCov = curve_fit(skew, bin_centres, LLRtruehhist, p0=p0)
+    falsehOpt, falsehCov = curve_fit(skew, bin_centres, LLRfalsehhist, p0=p0)
+
+    fine_binning = np.linspace(-2.5,1.0,len((values[dkey]['true_h_fiducial']['hypo_NMH']['llh'])))
+
+    plt.hist(LLRtrueh,bins=binning,color=colours[0],histtype='step')
+    plt.hist(LLRfalseh,bins=binning,color=colours[1],histtype='step')
+    plt.xlabel(r'Log-Likelihood Ratio')
+    plt.ylabel(r'Number of Trials (per %.2f)'%binwidth)
+    plt.ylim(0,plot_scaling_factor*LLRhistmax)
+    plt.axvline(LLR_FalseH_Median_Val,color='k',ymax=float(LLRfalsehhistmax)/float(plot_scaling_factor*LLRhistmax),label='False H Median LLR (%.4f)'%LLR_FalseH_Median_Val)
+    plt.axvline(LLR_TrueH_Median_Val,color='g',ymax=float(LLRfalsehhistmax)/float(plot_scaling_factor*LLRhistmax),label='True H Median LLR (%.4f)'%LLR_TrueH_Median_Val)
+    plt.legend(['False H Median LLR','True H Median LLR',labels[0],labels[1]],loc='upper left')
+    plt.title(LLRtitle)
+    plt.plot(fine_binning, skew(fine_binning, *truehOpt),color=colours[0])
+    plt.plot(fine_binning, skew(fine_binning, *falsehOpt),color=colours[1])
+    filename = "%s_%s_%s_LLRDistribution_SkewedGaussianFits_%i_Trials.png"%(dkey,detector,selection,len(values[dkey]['true_h_fiducial']['hypo_NMH']['llh']))
+    plt.figtext(0.15,0.60,r'p-value = $%.4f^{+%.4f}_{-%.4f}$'%(p_value,p1s,m1s),color='k',size='xx-large')
+    plt.subplots_adjust(bottom=0.12)
+    plt.savefig(outdir+"LLRDistributions/"+filename)
+    plt.close()
+
+    p0 = [600.0, 1.0, 1.1, 0.1, 0.2]
+
+    truehOpt, truehCov = curve_fit(crystalball, bin_centres, LLRtruehhist, p0=p0)
+    falsehOpt, falsehCov = curve_fit(crystalball, bin_centres, LLRfalsehhist, p0=p0)
+
+    fine_binning = np.linspace(-2.5,1.0,len((values[dkey]['true_h_fiducial']['hypo_NMH']['llh'])))
+
+    plt.hist(LLRtrueh,bins=binning,color=colours[0],histtype='step')
+    plt.hist(LLRfalseh,bins=binning,color=colours[1],histtype='step')
+    plt.xlabel(r'Log-Likelihood Ratio')
+    plt.ylabel(r'Number of Trials (per %.2f)'%binwidth)
+    plt.ylim(0,plot_scaling_factor*LLRhistmax)
+    plt.axvline(LLR_FalseH_Median_Val,color='k',ymax=float(LLRfalsehhistmax)/float(plot_scaling_factor*LLRhistmax),label='False H Median LLR (%.4f)'%LLR_FalseH_Median_Val)
+    plt.axvline(LLR_TrueH_Median_Val,color='g',ymax=float(LLRfalsehhistmax)/float(plot_scaling_factor*LLRhistmax),label='True H Median LLR (%.4f)'%LLR_TrueH_Median_Val)
+    plt.legend(['False H Median LLR','True H Median LLR',labels[0],labels[1]],loc='upper left')
+    plt.title(LLRtitle)
+    plt.plot(fine_binning, crystalball(fine_binning, *truehOpt),color=colours[0])
+    plt.plot(fine_binning, crystalball(fine_binning, *falsehOpt),color=colours[1])
+    filename = "%s_%s_%s_LLRDistribution_CrystalBallFits_%i_Trials.png"%(dkey,detector,selection,len(values[dkey]['true_h_fiducial']['hypo_NMH']['llh']))
+    plt.figtext(0.15,0.60,r'p-value = $%.4f^{+%.4f}_{-%.4f}$'%(p_value,p1s,m1s),color='k',size='xx-large')
+    plt.subplots_adjust(bottom=0.12)
+    plt.savefig(outdir+"LLRDistributions/"+filename)
     plt.close()
 
 print "IMH True p-value = %.4f"%IMH_true_pval
@@ -356,7 +455,7 @@ if Iposteriors == True:
                         if TemplateFit is not None:
                             plt.ylim(0,1.45*currentylim)
                     plt.title(MainTitle+r'\\'+title, fontsize=16)
-                    plt.savefig(filename)
+                    plt.savefig(outdir+"IndividualPosteriors/"+filename)
                     plt.close()
 
 ############################################################
@@ -501,7 +600,7 @@ if Cposteriors:
                 filename = r"%s_%s_%s_%s_%s_Posteriors.png"%(dkey,fkey,hkey,detector,selection)
                 plt.tight_layout()
                 plt.subplots_adjust(top=0.8)
-                plt.savefig(filename)
+                plt.savefig(outdir+"CombinedPosteriors/"+filename)
                 plt.close()
 
 ############################################################
@@ -551,7 +650,7 @@ if Iscatter == True:
                                 plt.xlabel(axislabels[xsystkey])
                                 plt.ylabel(axislabels[ysystkey])
                                 plt.title(MainTitle+r'\\'+title,fontsize=16)
-                                plt.savefig(filename)
+                                plt.savefig(outdir+"IndividualScatterPlots/"+filename)
                                 plt.close()
 
 ############################################################
@@ -619,7 +718,7 @@ if CIscatter:
                         filename = r"%s_%s_%s_%s_%s_%s_Scatter_Plots.png"%(dkey,fkey,hkey,xsystkey,detector,selection)
                         plt.tight_layout()
                         plt.subplots_adjust(top=0.8)
-                        plt.savefig(filename)
+                        plt.savefig(outdir+"CombinedScatterPlots/"+filename)
                         plt.close()
 
 ############################################################
@@ -679,7 +778,7 @@ if Cscatter:
                 filename = r"%s_%s_%s_%s_%s_All_Scatter_Plots.png"%(dkey,fkey,hkey,detector,selection)
                 plt.tight_layout()
                 plt.subplots_adjust(top=1.0)
-                plt.savefig(filename)
+                plt.savefig(outdir+"CombinedScatterPlots/"+filename)
                 plt.close()
 
 ############################################################
@@ -733,7 +832,7 @@ if CMatrix:
                 plt.yticks(np.arange(len(Systs)),Systs,rotation=0)
                 plt.tight_layout()
                 plt.subplots_adjust(left=-0.15,bottom=0.25)
-                plt.savefig(filename)
+                plt.savefig(outdir+"CorrelationMatrices/"+filename)
                 for i in range(0,len(all_corr_nparray)):
                     for j in range(0,len(all_corr_nparray[0])):
                         plt.text(i, j, '%.2f'%all_corr_nparray[i][j],
@@ -743,5 +842,39 @@ if CMatrix:
                                  path_effects=[PathEffects.withStroke(linewidth=3,
                                                                       foreground='k')])
                 filename = r"%s_%s_%s_%s_%s_Correlation_Matrix_ColorBarwValues.png"%(dkey,fkey,hkey,detector,selection)
-                plt.savefig(filename)
+                plt.savefig(outdir+"CorrelationMatrices/"+filename)
+                plt.close()
+
+############################################################
+
+############ Plot Atmospheric Mixing Contour
+
+############################################################
+
+if Contour:
+
+    MainTitle = '%s %s Event Selection Atmospheric Mixing Contour'%(detector, selection)
+    
+    for dkey in values.keys():
+        for fkey in values[dkey].keys():
+            for hkey in values[dkey][fkey].keys():
+                xvals = np.sin(np.array(values[dkey][fkey][hkey]['theta23'])*np.pi/180.0)*np.sin(np.array(values[dkey][fkey][hkey]['theta23'])*np.pi/180.0)
+                yvals = np.array(values[dkey][fkey][hkey]['deltam31'])
+                filename = r"%s_%s_%s_%s_%s_Atmospheric_Mixing_Contour.png"%(dkey,fkey,hkey,detector,selection)
+                plt.scatter(xvals,yvals)
+                
+                title = hypotitles[dkey][fkey][hkey]
+                title += ' (%i Trials)'%len(xvals)
+
+                Xrange = xvals.max() - xvals.min()
+                Yrange = yvals.max() - yvals.min()
+                plt.xlim(xvals.min()-0.1*Xrange,
+                         xvals.max()+0.1*Xrange)
+                plt.ylim(yvals.min()-0.1*Yrange,
+                         yvals.max()+0.3*Yrange)
+
+                plt.xlabel('$\sin^2\theta_{23}$')
+                plt.ylabel('$\Delta m^2_{31}$')
+                plt.title(MainTitle+r'\\'+title,fontsize=16)
+                plt.savefig(outdir+"Contours/"+filename)
                 plt.close()
