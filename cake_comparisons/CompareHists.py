@@ -24,8 +24,10 @@ args = parser.parse_args()
 titles = {}
 titles['nue'] = r'$\nu_e$'
 titles['nue_bar'] = r'$\bar{\nu}_e$'
+titles['nuebar'] = r'$\bar{\nu}_e$'
 titles['numu'] = r'$\nu_{\mu}$'
 titles['numu_bar'] = r'$\bar{\nu}_{\mu}$'
+titles['numubar'] = r'$\bar{\nu}_{\mu}$'
 
 titles['nue_cc'] = r'$\nu_e$ CC'
 titles['numu_cc'] = r'$\nu_{\mu}$ CC'
@@ -43,8 +45,13 @@ except:
 pisa_dict = from_json(args.pisa_file)
 
 for cake_dict in cake_array:
-    
-    pisa_map = pisa_dict[cake_dict['name']]
+
+    if cake_dict['name'] == 'numubar':
+        pisa_map = pisa_dict['numu_bar']
+    elif cake_dict['name'] == 'nuebar':
+        pisa_map = pisa_dict['nue_bar']
+    else:
+        pisa_map = pisa_dict[cake_dict['name']]
     cake_map = {}
     cake_map['map'] = cake_dict['hist'].T
 
@@ -61,7 +68,7 @@ for cake_dict in cake_array:
             cake_map['ebins'] = binning['bin_edges']
         if binning['name'] == 'reco_coszen':
             cake_map['czbins'] = binning['bin_edges']
-
+            
     RatioMapObj = ratio_map(cake_map, pisa_map)
     DiffMapObj = delta_map(pisa_map, cake_map)
     DiffRatioMapObj = ratio_map(DiffMapObj, pisa_map)

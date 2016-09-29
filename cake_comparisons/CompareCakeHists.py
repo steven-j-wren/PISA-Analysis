@@ -24,13 +24,19 @@ args = parser.parse_args()
 titles = {}
 titles['nue'] = r'$\nu_e$'
 titles['nue_bar'] = r'$\bar{\nu}_e$'
+titles['nuebar'] = r'$\bar{\nu}_e$'
 titles['numu'] = r'$\nu_{\mu}$'
 titles['numu_bar'] = r'$\bar{\nu}_{\mu}$'
+titles['numubar'] = r'$\bar{\nu}_{\mu}$'
 
 titles['nue_cc'] = r'$\nu_e$ CC'
 titles['numu_cc'] = r'$\nu_{\mu}$ CC'
 titles['nutau_cc'] = r'$\nu_{\tau}$ CC'
 titles['nuall_nc'] = r'$\nu$ NC'
+titles['nuebar_cc'] = r'$\bar{\nu}_e$ CC'
+titles['numubar_cc'] = r'$\bar{\nu}_{\mu}$ CC'
+titles['nutaubar_cc'] = r'$\bar{\nu}_{\tau}$ CC'
+titles['nuallbar_nc'] = r'$\bar{\nu}$ NC'
 
 titles['trck'] = r'Track-Like'
 titles['cscd'] = r'Cascade-Like'
